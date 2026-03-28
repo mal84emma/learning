@@ -17,6 +17,7 @@
 	color-scheme: light dark;
 	--sidebar-width: 220px;
 	--accent: oklch(0.55 0.16 350);
+	--accent-alt: oklch(0.76 0.055 157); /* Cambridge Blue (#A3C1AD) */
 	--accent-dark: #000d8a;
 	--black: 15, 18, 25;
 	--gray: 96, 115, 159;
@@ -289,6 +290,7 @@ hr {
 		--muted: oklch(0.269 0 0);
 		--muted-foreground: oklch(0.708 0 0);
 		--accent: oklch(0.78 0.14 350);
+		--accent-alt: oklch(0.83 0.065 157); /* Cambridge Blue, lightened for dark mode */
 		--accent-foreground: oklch(0.985 0 0);
 		--destructive: oklch(0.704 0.191 22.216);
 		--border: oklch(1 0 0 / 10%);
