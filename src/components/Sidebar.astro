@@ -179,12 +179,18 @@ const currentPath = Astro.url.pathname;
 		padding: 0.25em 1.5em 0.25em 2.5em;
 		font-size: 0.85em;
 		color: rgb(var(--gray));
+		transition: color 1.5s ease, border-left-color 1.5s ease;
 	}
 	.nav-links :global(a.heading-link:hover) {
-		color: var(--accent);
+		color: var(--accent-alt) !important;
 	}
 	.nav-links :global(a.heading-h2) {
 		padding-left: 3.5em;
+	}
+	.nav-links :global(a.heading-link.active-section) {
+		color: var(--accent-alt);
+		opacity: 1;
+		border-left-color: var(--accent-alt);
 	}
 	.social-links {
 		display: flex;
@@ -245,4 +251,51 @@ const currentPath = Astro.url.pathname;
 	toggle.addEventListener('click', () => {
 		setCollapsed(!sidebar.classList.contains('collapsed'));
 	});
+
+	// Highlight active section heading based on scroll position
+	const headingLinks = document.querySelectorAll<HTMLAnchorElement>('.heading-link');
+	if (headingLinks.length > 0) {
+		const headingEls = Array.from(headingLinks).map((link) => {
+			const id = link.getAttribute('href')!.slice(1);
+			return document.getElementById(id);
+		}).filter((el): el is HTMLElement => el !== null);
+
+		let activeEl: HTMLElement | null = null;
+		let lastScrollY = window.scrollY;
+
+		function setActive(el: HTMLElement | null) {
+			if (el === activeEl) return;
+			activeEl = el;
+			headingLinks.forEach((link) => {
+				const id = link.getAttribute('href')!.slice(1);
+				link.classList.toggle('active-section', el?.id === id);
+			});
+		}
+
+		function updateActiveHeading() {
+			const midpoint = window.innerHeight * 0.4;
+			const scrollingUp = window.scrollY < lastScrollY;
+			lastScrollY = window.scrollY;
+
+			let current: HTMLElement | null = null;
+
+			for (const el of headingEls) {
+				const top = el.getBoundingClientRect().top;
+				if (scrollingUp) {
+					// When scrolling up: once a heading has gone below the midpoint,
+					// the previous heading (stored in current) should be active
+					if (top > midpoint) break;
+					current = el;
+				} else {
+					// When scrolling down: activate the last heading above the midpoint
+					if (top <= midpoint) current = el;
+				}
+			}
+
+			setActive(current ?? headingEls[0]);
+		}
+
+		window.addEventListener('scroll', updateActiveHeading, { passive: true });
+		updateActiveHeading();
+	}
 </script>
