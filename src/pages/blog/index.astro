@@ -69,6 +69,11 @@ const posts = (await getCollection('blog')).sort(
 			ul a:hover img {
 				box-shadow: var(--box-shadow);
 			}
+			@media (prefers-color-scheme: dark) {
+				.title {
+					color: oklch(0.985 0 0);
+				}
+			}
 			@media (max-width: 720px) {
 				ul {
 					gap: 0.5em;
