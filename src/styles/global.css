@@ -15,6 +15,7 @@
 
 :root {
 	color-scheme: light dark;
+	--sidebar-width: 220px;
 	--accent: oklch(0.55 0.16 350);
 	--accent-dark: #000d8a;
 	--black: 15, 18, 25;
