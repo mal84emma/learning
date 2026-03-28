@@ -12,6 +12,7 @@ const posts = (await getCollection('blog')).sort(
 	(a, b) => (a.data.orderingNumber) - (b.data.orderingNumber),
 );
 
+const base = import.meta.env.BASE_URL;
 const currentPath = Astro.url.pathname;
 ---
 
@@ -24,13 +25,14 @@ const currentPath = Astro.url.pathname;
 		</svg>
 	</button>
 	<nav>
-		<h2><a href="/">{SITE_TITLE}</a></h2>
+		<h2><a href={import.meta.env.BASE_URL}>{SITE_TITLE}</a></h2>
 		<div class="nav-links">
 			{posts.map((post) => {
-				const isActive = currentPath === `/blog/${post.id}/`;
+				const postHref = `${base}/blog/${post.id}`;
+				const isActive = currentPath === postHref;
 				return (
 					<>
-						<a href={`/blog/${post.id}/`} class={isActive ? 'active' : ''}>
+						<a href={postHref} class={isActive ? 'active' : ''}>
 							{post.data.title}
 						</a>
 						{isActive && h1s.length > 0 && (
