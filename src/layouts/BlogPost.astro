@@ -16,9 +16,28 @@ const { title, description, pubDate, updatedDate, heroImage, headings } = Astro.
 	<head>
 		<BaseHead title={title} description={description} />
 		<style is:global>
+			#page-scrollbar {
+				position: fixed;
+				right: 0;
+				top: 0;
+				bottom: 0;
+				width: 5px;
+				pointer-events: none;
+				z-index: 0;
+			}
+			#page-scrollbar-thumb {
+				position: absolute;
+				right: 0;
+				width: 5px;
+				background: rgb(var(--gray-light));
+			}
 			html {
+				scrollbar-width: none;
 				scroll-behavior: smooth;
 				transition: scroll-behavior 3s ease;
+			}
+			html::-webkit-scrollbar {
+				display: none;
 			}
 			body {
 				padding-left: var(--sidebar-width);
@@ -84,6 +103,9 @@ const { title, description, pubDate, updatedDate, heroImage, headings } = Astro.
 	</head>
 
 	<body>
+		<div id="page-scrollbar">
+			<div id="page-scrollbar-thumb"></div>
+		</div>
 		<Sidebar headings={headings} />
 		<main>
 			<article>
@@ -110,5 +132,21 @@ const { title, description, pubDate, updatedDate, heroImage, headings } = Astro.
 			</article>
 		</main>
 		<Footer />
+		<script>
+			const pageThumb = document.getElementById('page-scrollbar-thumb')!;
+
+			function updatePageThumb() {
+				const scrollHeight = document.documentElement.scrollHeight;
+				const clientHeight = window.innerHeight;
+				const ratio = clientHeight / scrollHeight;
+				const thumbHeight = clientHeight * ratio;
+				const thumbTop = (window.scrollY / scrollHeight) * clientHeight;
+				pageThumb.style.height = `${thumbHeight}px`;
+				pageThumb.style.top = `${thumbTop}px`;
+			}
+
+			window.addEventListener('scroll', updatePageThumb, { passive: true });
+			updatePageThumb();
+		</script>
 	</body>
 </html>
