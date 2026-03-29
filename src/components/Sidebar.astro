@@ -143,7 +143,7 @@ const currentPath = Astro.url.pathname;
 	h2 a,
 	h2 a.active {
 		text-decoration: none;
-		color: var(--accent-alt);
+		color: rgb(var(--gray-dark));
 		font-weight: 700;
 		font-size: 1.25em;
 		transition: color 0.2s ease;
@@ -180,19 +180,19 @@ const currentPath = Astro.url.pathname;
 	.nav-links :global(a.heading-link) {
 		padding: 0.25em 1.5em 0.25em 2.5em;
 		font-size: 0.85em;
-		color: rgb(var(--gray));
+		color: rgb(var(--gray-dark));
 		transition: color 1.5s ease, border-left-color 1.5s ease;
 	}
 	.nav-links :global(a.heading-link:hover) {
-		color: var(--accent-alt) !important;
+		color: var(--accent-alt-dark) !important;
 	}
 	.nav-links :global(a.heading-h2) {
 		padding-left: 3.5em;
 	}
 	.nav-links :global(a.heading-link.active-section) {
-		color: var(--accent-alt);
+		color: var(--accent-alt-dark);
 		opacity: 1;
-		border-left-color: var(--accent-alt);
+		border-left-color: var(--accent-alt-dark);
 	}
 	.social-links {
 		display: flex;
@@ -209,16 +209,10 @@ const currentPath = Astro.url.pathname;
 		color: var(--accent);
 	}
 	@media (prefers-color-scheme: dark) {
-		.nav-links :global(a.heading-link) {
+		h2 a,
+		h2 a.active {
 			color: rgb(var(--gray-light));
-			opacity: 0.6;
 		}
-		.nav-links :global(a.heading-link:hover) {
-			opacity: 1;
-			color: var(--accent);
-		}
-	}
-	@media (prefers-color-scheme: dark) {
 		#sidebar-toggle {
 			border-color: oklch(1 0 0 / 10%);
 			color: rgb(var(--gray-light));
@@ -230,6 +224,18 @@ const currentPath = Astro.url.pathname;
 		}
 		.nav-links :global(a) {
 			color: rgb(var(--gray-light));
+		}
+		.nav-links :global(a.heading-link) {
+			color: rgb(var(--gray-light));
+			opacity: 0.6;
+		}
+		.nav-links :global(a.heading-link:hover) {
+			opacity: 1;
+			color: var(--accent-alt-light);
+		}
+		.nav-links :global(a.heading-link.active-section) {
+			color: var(--accent-alt-light);
+			border-left-color: var(--accent-alt-light);
 		}
 	}
 </style>

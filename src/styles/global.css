@@ -18,6 +18,8 @@
 	--sidebar-width: 220px;
 	--accent: oklch(0.55 0.16 350);
 	--accent-alt: oklch(0.76 0.055 157); /* Cambridge Blue (#A3C1AD) */
+	--accent-alt-light: oklch(from var(--accent-alt) calc(l + 0.0) c h);
+	--accent-alt-dark: oklch(from var(--accent-alt) calc(l - 0.2) c h);
 	--accent-dark: #000d8a;
 	--black: 15, 18, 25;
 	--gray: 96, 115, 159;
@@ -27,7 +29,7 @@
 	--box-shadow:
 		0 2px 6px rgba(var(--gray), 25%), 0 8px 24px rgba(var(--gray), 33%),
 		0 16px 32px rgba(var(--gray), 33%);
-	--background: oklch(1 0 0);
+	--background: oklch(0.93 0 0);
 	--foreground: oklch(0.145 0 0);
 	--card: oklch(1 0 0);
 	--card-foreground: oklch(0.145 0 0);
@@ -65,8 +67,26 @@ body {
 	margin: 0;
 	padding: 0;
 	text-align: left;
-	background: linear-gradient(var(--gray-gradient)) no-repeat;
-	background-size: 100% 600px;
+	background-color: var(--background);
+	background-image:
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.25' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.075'/%3E%3C/svg%3E"),
+		repeating-linear-gradient(
+			80deg,
+			transparent 0px,
+			oklch(from var(--background) calc(l - 0.02) c h / 0.7) 250px,
+			oklch(from var(--background) calc(l - 0.01) c h / 0.7) 550px,
+			oklch(from var(--background) calc(l - 0.035) c h / 0.7) 800px,
+			oklch(from var(--background) calc(l - 0.015) c h / 0.7) 1050px,
+			transparent 1300px
+		),
+		repeating-linear-gradient(
+			to bottom,
+			var(--background) 0px,
+			oklch(from var(--background) calc(l - 0.06) c h) 750px,
+			var(--background) 1500px
+		);
+	background-repeat: repeat, repeat, repeat;
+	background-size: 200px, 1300px 100%, 100% 1500px;
 	word-wrap: break-word;
 	overflow-wrap: break-word;
 	color: rgb(var(--gray-dark));
@@ -140,12 +160,6 @@ code {
 	background-color: rgb(var(--gray-light));
 	border-radius: 2px;
 }
-@media (prefers-color-scheme: dark) {
-	code {
-		background-color: rgb(var(--gray-dark));
-		color: rgb(var(--gray-light));
-	}
-}
 pre {
 	padding: 1.5em;
 	border-radius: 8px;
@@ -174,6 +188,25 @@ hr {
 @media (prefers-color-scheme: dark) {
 	body {
 		color: rgb(var(--gray-light));
+		background-image:
+			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.25' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' fill='white' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+			repeating-linear-gradient(
+				80deg,
+				transparent 0px,
+				oklch(from var(--background) calc(l + 0.02) c h / 0.8) 250px,
+				oklch(from var(--background) calc(l + 0.01) c h / 0.8) 550px,
+				oklch(from var(--background) calc(l + 0.035) c h / 0.8) 800px,
+				oklch(from var(--background) calc(l + 0.015) c h / 0.8) 1050px,
+				transparent 1300px
+			),
+			repeating-linear-gradient(
+				to bottom,
+				var(--background) 0px,
+				oklch(from var(--background) calc(l + 0.06) c h) 750px,
+				var(--background) 1500px
+			);
+		background-repeat: repeat, repeat, repeat;
+		background-size: 200px, 1300px 100%, 100% 1500px;
 	}
 	h1,
 	h2,
@@ -185,6 +218,10 @@ hr {
 	}
 	hr {
 		border-top-color: oklch(1 0 0 / 10%);
+	}
+	code {
+		background-color: rgb(var(--gray-dark));
+		color: rgb(var(--gray-light));
 	}
 }
 
