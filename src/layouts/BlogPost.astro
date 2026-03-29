@@ -16,12 +16,16 @@ const { title, description, pubDate, updatedDate, heroImage, headings } = Astro.
 	<head>
 		<BaseHead title={title} description={description} />
 		<style is:global>
+			html {
+				scroll-behavior: smooth;
+				transition: scroll-behavior 3s ease;
+			}
 			body {
 				padding-left: var(--sidebar-width);
-				transition: padding-left 0.5s ease;
+				transition: padding-left 1s ease;
 			}
 			body.sidebar-collapsed {
-				padding-left: 3.25rem;
+				padding-left: 0;
 			}
 			@media (max-width: 720px) {
 				body {
