@@ -33,6 +33,15 @@ const { title, description, pubDate, updatedDate, heroImage, headings } = Astro.
 					padding-left: 0;
 				}
 			}
+			.prose hr {
+				border: none;
+				border-top: 2px solid rgb(var(--gray-dark));
+			}
+			@media (prefers-color-scheme: dark) {
+				.prose hr {
+					border-top: 2px solid rgb(var(--gray-light));
+				}
+			}
 		</style>
 		<style>
 			main {
@@ -73,12 +82,19 @@ const { title, description, pubDate, updatedDate, heroImage, headings } = Astro.
 			.last-updated-on {
 				font-style: italic;
 			}
+			.title hr {
+				border: none;
+				border-top: 2px solid rgb(var(--gray-dark));
+			}
 			@media (prefers-color-scheme: dark) {
 				.prose {
 					color: rgb(var(--gray-light));
 				}
 				.date {
 					color: oklch(0.708 0 0);
+				}
+				.title hr {
+					border-top: 2px solid rgb(var(--gray-light));
 				}
 			}
 		</style>
