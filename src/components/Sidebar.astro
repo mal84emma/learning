@@ -17,6 +17,14 @@ const currentPath = Astro.url.pathname;
 ---
 
 <aside id="sidebar">
+	<script is:inline>
+		// Apply collapsed state synchronously before first paint to avoid flash
+		const savedState = localStorage.getItem('sidebar-collapsed');
+		if (savedState === 'true' || (savedState === null && window.innerWidth < 1000)) {
+			document.getElementById('sidebar').classList.add('collapsed');
+			document.body.classList.add('sidebar-collapsed');
+		}
+	</script>
 	<div class="nav-scrollbar" id="nav-scrollbar">
 		<div class="nav-scrollbar-thumb" id="nav-scrollbar-thumb"></div>
 	</div>
