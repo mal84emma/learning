@@ -266,16 +266,32 @@ const currentPath = Astro.url.pathname;
 
 	updateThumb();
 
-	function setCollapsed(collapsed: boolean) {
+	function setCollapsed(collapsed: boolean, instant = false, save = true) {
+		if (instant) {
+			sidebar.style.transition = 'none';
+			document.body.style.transition = 'none';
+		}
 		sidebar.classList.toggle('collapsed', collapsed);
 		document.body.classList.toggle('sidebar-collapsed', collapsed);
 		toggle.setAttribute('aria-expanded', String(!collapsed));
-		localStorage.setItem('sidebar-collapsed', String(collapsed));
+		if (save) localStorage.setItem('sidebar-collapsed', String(collapsed));
+		if (instant) {
+			// Re-enable transitions after the instantaneous state change has been painted
+			requestAnimationFrame(() => requestAnimationFrame(() => {
+				sidebar.style.transition = '';
+				document.body.style.transition = '';
+			}));
+		}
 	}
 
-	// Restore persisted state before first paint
-	if (localStorage.getItem('sidebar-collapsed') === 'true') {
-		setCollapsed(true);
+	const savedState = localStorage.getItem('sidebar-collapsed');
+	if (savedState === 'true') {
+		// Restore explicitly persisted collapsed state without animation
+		setCollapsed(true, true);
+	} else if (savedState === null && window.innerWidth < 1000) {
+		// No saved preference: default to closed on viewports narrower than content max-width
+		// Don't persist this so the toggle always reflects the user's explicit choice
+		setCollapsed(true, true, false);
 	}
 
 	toggle.addEventListener('click', () => {

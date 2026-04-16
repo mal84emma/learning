@@ -3,18 +3,44 @@ import { type CollectionEntry, getCollection, render } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
 
 export async function getStaticPaths() {
-	const posts = await getCollection('blog');
-	return posts.map((post) => ({
-		params: { slug: post.id },
-		props: post,
-	}));
-}
-type Props = CollectionEntry<'blog'>;
+	const allPosts = await getCollection('blog');
 
-const post = Astro.props;
+	// Ordered list used only for prev/next navigation — excludes orderingNumber === -1 (null value)
+	const orderedPosts = allPosts
+		.filter((p) => p.data.orderingNumber !== -1)
+		.sort((a, b) => a.data.orderingNumber - b.data.orderingNumber);
+
+	return allPosts.map((post) => {
+		const orderedIndex = orderedPosts.findIndex((p) => p.id === post.id);
+		return {
+			params: { slug: post.id },
+			props: {
+				post,
+				prevPost: orderedIndex > 0 ? orderedPosts[orderedIndex - 1] : null,
+				nextPost:
+					orderedIndex !== -1 && orderedIndex < orderedPosts.length - 1
+						? orderedPosts[orderedIndex + 1]
+						: null,
+			},
+		};
+	});
+}
+
+type Props = {
+	post: CollectionEntry<'blog'>;
+	prevPost: CollectionEntry<'blog'> | null;
+	nextPost: CollectionEntry<'blog'> | null;
+};
+
+const { post, prevPost, nextPost } = Astro.props;
 const { Content, headings } = await render(post);
 ---
 
-<BlogPost {...post.data} headings={headings}>
+<BlogPost
+	{...post.data}
+	headings={headings}
+	prevPost={prevPost ? { slug: prevPost.id, shortTitle: prevPost.data.shortTitle } : undefined}
+	nextPost={nextPost ? { slug: nextPost.id, shortTitle: nextPost.data.shortTitle } : undefined}
+>
 	<Content />
 </BlogPost>

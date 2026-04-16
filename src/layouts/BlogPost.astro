@@ -8,9 +8,16 @@ import PageScrollbar from '../components/PageScrollbar.astro';
 import Sidebar from '../components/Sidebar.astro';
 
 type Heading = { depth: number; slug: string; text: string };
-type Props = CollectionEntry<'blog'>['data'] & { headings?: Heading[] };
+type PostNavTarget = { slug: string; shortTitle: string };
+type Props = CollectionEntry<'blog'>['data'] & {
+	headings?: Heading[];
+	prevPost?: PostNavTarget;
+	nextPost?: PostNavTarget;
+};
 
-const { title, description, pubDate, updatedDate, heroImage, headings } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, headings, prevPost, nextPost } =
+	Astro.props;
+const base = import.meta.env.BASE_URL;
 ---
 
 <html lang="en">
@@ -48,7 +55,7 @@ const { title, description, pubDate, updatedDate, heroImage, headings } = Astro.
 				width: 100%;
 				max-width: 100%;
 				margin: 0;
-				padding: 3em 2em;
+				padding: 3em 2em 1.5em;
 				box-sizing: border-box;
 			}
 			.hero-image {
@@ -97,6 +104,69 @@ const { title, description, pubDate, updatedDate, heroImage, headings } = Astro.
 					border-top: 2px solid rgb(var(--gray-light));
 				}
 			}
+			.post-pagination {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-start;
+				padding-top: 2.5em;
+				width: 1000px;
+				max-width: 100%;
+				margin: 0 auto;
+			}
+			.pagination-btn {
+				display: flex;
+				flex-direction: row;
+				align-items: stretch;
+				gap: 0.5em;
+				padding: 0.5em 1.25em;
+				border-radius: calc(var(--radius) * 1.5);
+				background: color-mix(in oklch, var(--input) 30%, transparent);
+				color: color-mix(in oklch, var(--foreground) 75%, var(--background));
+				text-decoration: none;
+				font-size: 1rem;
+				font-weight: 500;
+				line-height: 1.33;
+				transition:
+					background 0.2s,
+					color 0.2s;
+				max-width: 18em;
+			}
+			.pagination-btn:hover {
+				background: color-mix(in oklch, var(--input) 55%, transparent);
+				color: color-mix(in oklch, var(--foreground) 75%, var(--background));
+				text-decoration: none;
+			}
+			.pagination-chevron {
+				display: flex;
+				align-items: center;
+				flex-shrink: 0;
+			}
+			.pagination-chevron svg {
+				height: 100%;
+				width: 2.5em;
+				display: block;
+				transition: transform 0.2s ease;
+			}
+			.pagination-prev:hover .pagination-chevron svg {
+				transform: translateX(-3px);
+			}
+			.pagination-next:hover .pagination-chevron svg {
+				transform: translateX(3px);
+			}
+			.pagination-text {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+			}
+			.pagination-label {
+				font-style: italic;
+			}
+			.pagination-prev {
+				padding-left: 0.2em;
+			}
+			.pagination-next {
+				padding-right: 0.2em;
+			}
 		</style>
 	</head>
 
@@ -126,6 +196,44 @@ const { title, description, pubDate, updatedDate, heroImage, headings } = Astro.
 					<slot />
 				</div>
 			</article>
+			{
+				(prevPost || nextPost) && (
+					<nav class="post-pagination">
+						<div>
+							{prevPost && (
+								<a
+									href={`${base}blog/${prevPost.slug}`}
+									class="pagination-btn pagination-prev"
+								>
+									<div class="pagination-chevron">
+										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+									</div>
+									<div class="pagination-text">
+										<span class="pagination-label">Previous</span>
+										<span>{prevPost.shortTitle}</span>
+									</div>
+								</a>
+							)}
+						</div>
+						<div>
+							{nextPost && (
+								<a
+									href={`${base}blog/${nextPost.slug}`}
+									class="pagination-btn pagination-next"
+								>
+									<div class="pagination-text">
+										<span class="pagination-label">Next</span>
+										<span>{nextPost.shortTitle}</span>
+									</div>
+									<div class="pagination-chevron">
+										<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+									</div>
+								</a>
+							)}
+						</div>
+					</nav>
+				)
+			}
 		</main>
 		<Footer />
 	</body>

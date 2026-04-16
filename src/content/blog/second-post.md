@@ -3,6 +3,7 @@ title: 'Second post'
 description: 'Lorem ipsum dolor sit amet'
 pubDate: 'Jul 15 2022'
 orderingNumber: 2
+shortTitle: 'Second Post'
 heroImage: '../../assets/blog-placeholder-4.jpg'
 ---
 
