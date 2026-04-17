@@ -62,8 +62,10 @@
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
 }
+:root.font-xs { --prose-font-size: 0.825rem; }
 :root.font-sm { --prose-font-size: 0.9rem; }
 :root.font-lg { --prose-font-size: 1.15rem; }
+:root.font-xl { --prose-font-size: 1.3rem; }
 
 /* @font-face for Atkinson is injected by BaseHead.astro using import.meta.env.BASE_URL */
 html {

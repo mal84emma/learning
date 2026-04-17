@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import { SITE_TITLE } from '../consts';
-import FontSizeControl from './FontSizeControl.astro';
 
 type Heading = { depth: number; slug: string; text: string };
 interface Props { headings?: Heading[] }
@@ -25,11 +24,12 @@ const currentPath = Astro.url.pathname;
 			document.getElementById('sidebar').classList.add('collapsed');
 			document.body.classList.add('sidebar-collapsed');
 		}
+		const savedFontSize = localStorage.getItem('learning-font-size');
+		if (savedFontSize) document.documentElement.classList.add(savedFontSize);
 	</script>
 	<div class="nav-scrollbar" id="nav-scrollbar">
 		<div class="nav-scrollbar-thumb" id="nav-scrollbar-thumb"></div>
 	</div>
-	<button id="shortcuts-btn" aria-label="Keyboard shortcuts">?</button>
 	<button id="sidebar-toggle" aria-label="Toggle navigation" aria-expanded="true">
 		<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
 			<line x1="3" y1="6" x2="21" y2="6" />
@@ -69,36 +69,10 @@ const currentPath = Astro.url.pathname;
 				);
 			})}
 		</div>
-		<FontSizeControl />
 	</nav>
 </aside>
 
 <style>
-	#shortcuts-btn {
-		position: absolute;
-		top: 4rem;
-		right: 0.5rem;
-		z-index: 2;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.25rem;
-		height: 2.25rem;
-		padding: 0;
-		background: var(--background);
-		border: 1px solid rgb(var(--gray-light));
-		border-radius: var(--radius-md);
-		color: rgb(var(--gray-dark));
-		cursor: pointer;
-		box-shadow: 0 1px 4px rgba(var(--black), 8%);
-		font-size: 0.85rem;
-		font-weight: 600;
-		font-family: inherit;
-		transition: color 0.2s ease;
-	}
-	#shortcuts-btn:hover {
-		color: var(--accent);
-	}
 	#sidebar-toggle {
 		position: absolute;
 		top: 1rem;
@@ -268,10 +242,6 @@ const currentPath = Astro.url.pathname;
 		opacity: 1;
 		border-left-color: var(--accent-alt-dark);
 	}
-	aside.collapsed :global(.font-size-control) {
-		opacity: 0;
-		pointer-events: none;
-	}
 	.social-links {
 		display: flex;
 		flex-direction: row;
@@ -290,11 +260,6 @@ const currentPath = Astro.url.pathname;
 		h2 a,
 		h2 a.active {
 			color: rgb(var(--gray-light));
-		}
-		#shortcuts-btn {
-			border-color: oklch(1 0 0 / 10%);
-			color: rgb(var(--gray-light));
-			box-shadow: 0 1px 4px rgba(0, 0, 0, 30%);
 		}
 		#search-btn {
 			color: rgb(var(--gray-light));
@@ -394,10 +359,6 @@ const currentPath = Astro.url.pathname;
 
 	document.getElementById('search-btn')?.addEventListener('click', () => {
 		document.dispatchEvent(new CustomEvent('open-search'));
-	});
-
-	document.getElementById('shortcuts-btn')?.addEventListener('click', () => {
-		document.dispatchEvent(new CustomEvent('open-shortcuts'));
 	});
 
 	// Highlight active section heading based on scroll position

@@ -3,6 +3,17 @@
 
 <dialog id="shortcuts-modal" aria-label="Keyboard shortcuts">
 	<h2>Keyboard Shortcuts</h2>
+	<div class="font-size-section">
+		<span class="font-size-label">Text size</span>
+		<div class="font-size-scale">
+			<button class="scale-btn" data-size="font-xs">A</button>
+			<button class="scale-btn" data-size="font-sm">A</button>
+			<button class="scale-btn" data-size="">A</button>
+			<button class="scale-btn" data-size="font-lg">A</button>
+			<button class="scale-btn" data-size="font-xl">A</button>
+		</div>
+		<div class="scale-track"></div>
+	</div>
 	<table>
 		<tbody>
 			<tr><td><kbd>→</kbd> / <kbd>]</kbd></td><td>Next post</td></tr>
@@ -17,8 +28,40 @@
 
 <script>
 	const modal = document.getElementById('shortcuts-modal') as HTMLDialogElement;
+	const scaleButtons = document.querySelectorAll<HTMLButtonElement>('#shortcuts-modal .scale-btn');
+	const fontSizes = ['font-xs', 'font-sm', '', 'font-lg', 'font-xl'];
 
-	document.addEventListener('open-shortcuts', () => modal.showModal());
+	function getCurrentSize(): string {
+		for (const s of fontSizes) {
+			if (s && document.documentElement.classList.contains(s)) return s;
+		}
+		return '';
+	}
+
+	function updateActiveButton() {
+		const current = getCurrentSize();
+		scaleButtons.forEach((btn) => {
+			btn.classList.toggle('active', btn.dataset.size === current);
+		});
+	}
+
+	function applySize(size: string) {
+		for (const s of fontSizes) {
+			if (s) document.documentElement.classList.remove(s);
+		}
+		if (size) document.documentElement.classList.add(size);
+		localStorage.setItem('learning-font-size', size);
+		updateActiveButton();
+	}
+
+	scaleButtons.forEach((btn) => {
+		btn.addEventListener('click', () => applySize(btn.dataset.size ?? ''));
+	});
+
+	document.addEventListener('open-shortcuts', () => {
+		modal.showModal();
+		updateActiveButton();
+	});
 
 	document.addEventListener('keydown', (e) => {
 		if (e.key === '?' && modal.open) modal.close();
@@ -55,6 +98,65 @@
 		font-weight: 600;
 		color: var(--foreground);
 	}
+	.font-size-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		margin-bottom: 1rem;
+		padding-bottom: 1.4rem;
+		border-bottom: 1px solid oklch(from var(--foreground) l c h / 10%);
+	}
+	.font-size-label {
+		font-size: 0.875rem;
+		color: var(--muted-foreground);
+	}
+	.font-size-scale {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 80%;
+		margin: 0 auto;
+	}
+	.scale-track {
+		height: 2px;
+		background: oklch(from var(--foreground) l c h / 18%);
+		width: 80%;
+		margin: 0 auto;
+	}
+	.scale-btn {
+		position: relative;
+		display: flex;
+		align-items: flex-end;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0.2em 0.35em 0.15em;
+		color: var(--muted-foreground);
+		font-family: inherit;
+		font-weight: 600;
+		line-height: 1;
+		transition: color 0.15s;
+	}
+	.scale-btn::after {
+		content: '^';
+		position: absolute;
+		top: calc(100% + 0.5rem);
+		left: 50%;
+		transform: translateX(-50%);
+		font-size: 1rem;
+		font-weight: 400;
+		line-height: 1;
+		visibility: hidden;
+		color: var(--foreground);
+	}
+	.scale-btn:nth-child(1) { font-size: 0.75rem; }
+	.scale-btn:nth-child(2) { font-size: 0.875rem; }
+	.scale-btn:nth-child(3) { font-size: 1rem; }
+	.scale-btn:nth-child(4) { font-size: 1.15rem; }
+	.scale-btn:nth-child(5) { font-size: 1.3rem; }
+	.scale-btn.active { color: var(--foreground); }
+	.scale-btn.active::after { visibility: visible; }
+	.scale-btn:hover { color: var(--accent); }
 	#shortcuts-modal table {
 		width: 100%;
 		border-collapse: collapse;
