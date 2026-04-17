@@ -7,6 +7,7 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
 import react from '@astrojs/react';
+import pagefind from 'astro-pagefind';
 import { remarkReadingTime } from './src/plugins/remark-reading-time.mjs';
 
 // https://astro.build/config
@@ -14,7 +15,7 @@ export default defineConfig({
   site: 'https://mal84emma.github.io',
   base: '/learning',
   trailingSlash: 'never',
-  integrations: [mdx(), sitemap(), react()],
+  integrations: [mdx(), sitemap(), react(), pagefind()],
 
   markdown: { remarkPlugins: [remarkReadingTime] },
 

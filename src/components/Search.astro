@@ -1,26 +1,19 @@
 ---
+import AstroSearch from "astro-pagefind/components/Search";
 ---
 
 <dialog id="search-modal" aria-label="Search">
-	<div id="search-mount"></div>
+	<AstroSearch uiOptions={{ showSubResults: true, showImages: false }} />
 </dialog>
 
 <script>
 	const modal = document.getElementById('search-modal') as HTMLDialogElement;
-	let initialised = false;
 
-	async function openSearch() {
+	function openSearch() {
 		modal.showModal();
-		if (!initialised) {
-			initialised = true;
-			const { PagefindUI } = await import(
-				/* @vite-ignore */
-				`${import.meta.env.BASE_URL}/pagefind/pagefind-ui.js`
-			);
-			new PagefindUI({ element: '#search-mount', showSubResults: true, baseUrl: import.meta.env.BASE_URL });
-		}
-		const input = modal.querySelector<HTMLInputElement>('input[type="text"]');
-		input?.focus();
+		requestAnimationFrame(() => {
+			modal.querySelector<HTMLInputElement>('input')?.focus();
+		});
 	}
 
 	document.addEventListener('open-search', openSearch);
@@ -32,15 +25,14 @@
 
 <style is:global>
 	#search-modal {
+		--pagefind-ui-scale: 0.9;
 		--pagefind-ui-primary: var(--accent);
 		--pagefind-ui-text: var(--foreground);
 		--pagefind-ui-background: var(--background);
-		--pagefind-ui-border: oklch(from var(--foreground) l c h / 15%);
-		--pagefind-ui-border-width: 1px;
+		--pagefind-ui-border-width: 0px;
 		--pagefind-ui-border-radius: var(--radius);
-		--pagefind-ui-font: inherit;
-	}
-	#search-modal {
+		--pagefind-ui-font: "Atkinson", sans-serif;
+
 		position: fixed;
 		top: 10vh;
 		left: 50%;
@@ -48,12 +40,12 @@
 		width: min(640px, 90vw);
 		max-height: 80vh;
 		margin: 0;
-		padding: 1.5rem;
+		padding: 0;
 		background: var(--background);
 		border: 1px solid oklch(from var(--foreground) l c h / 12%);
-		border-radius: calc(var(--radius) * 1.4);
+		border-radius: calc(var(--radius) * 2);
 		box-shadow: 0 8px 40px rgba(0, 0, 0, 20%);
-		overflow-y: auto;
+		overflow: hidden;
 		z-index: 300;
 		color: var(--foreground);
 	}
@@ -61,12 +53,67 @@
 		background: oklch(0 0 0 / 40%);
 		backdrop-filter: blur(2px);
 	}
+
+	/* Input fills dialog edge-to-edge; form provides bottom separator */
+	#search-modal .pagefind-ui__form {
+		border-bottom: 1px solid oklch(from var(--foreground) l c h / 8%);
+	}
+	#search-modal .pagefind-ui__search-input {
+		font-weight: 400;
+		border-radius: 0;
+	}
+	#search-modal .pagefind-ui__search-input:focus {
+		outline: none;
+	}
+	/* Results area gets the horizontal/bottom padding */
+	#search-modal .pagefind-ui__drawer {
+		padding: 0 1.25rem 1rem;
+		overflow-y: auto;
+		max-height: calc(80vh - 58px);
+	}
+
+	/* Tighter result spacing */
+	#search-modal .pagefind-ui__result {
+		padding: 0.25rem 0;
+	}
+
+	/* Result title links: match site link style (accent colour, no underline) */
+	#search-modal .pagefind-ui__result-link {
+		color: var(--foreground);
+		text-decoration: none;
+	}
+	#search-modal .pagefind-ui__result-link:hover {
+		color: oklch(from var(--accent) calc(l - 0.1) c h);
+		text-decoration: none;
+	}
+
+	/* Nested sub-result links: same treatment; swap curved arrow for squared enter symbol */
+	#search-modal .pagefind-ui__result-nested .pagefind-ui__result-link {
+		color: var(--accent);
+	}
+	#search-modal .pagefind-ui__result-nested .pagefind-ui__result-link::before {
+		content: "\21B3";
+	}
+	#search-modal .pagefind-ui__result-nested .pagefind-ui__result-link:hover {
+		color: oklch(from var(--accent) calc(l - 0.1) c h);
+		text-decoration: none;
+	}
+
+	/* Mark highlights: use accent tint instead of browser yellow */
+	#search-modal mark {
+		background-color: oklch(from var(--accent) l c h / 20%);
+		color: inherit;
+	}
+
 	@media (prefers-color-scheme: dark) {
 		#search-modal {
 			box-shadow: 0 8px 40px rgba(0, 0, 0, 60%);
 		}
 		#search-modal::backdrop {
 			background: oklch(0 0 0 / 60%);
+		}
+		#search-modal mark {
+			background-color: oklch(from var(--accent) l c h / 25%);
 		}
 	}
 </style>
