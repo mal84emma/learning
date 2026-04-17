@@ -1,0 +1,92 @@
+---
+---
+
+<dialog id="shortcuts-modal" aria-label="Keyboard shortcuts">
+	<h2>Keyboard Shortcuts</h2>
+	<table>
+		<tbody>
+			<tr><td><kbd>→</kbd> / <kbd>]</kbd></td><td>Next post</td></tr>
+			<tr><td><kbd>←</kbd> / <kbd>[</kbd></td><td>Previous post</td></tr>
+			<tr><td><kbd>f</kbd> / <kbd>s</kbd></td><td>Toggle sidebar</td></tr>
+			<tr><td><kbd>/</kbd></td><td>Open search</td></tr>
+			<tr><td><kbd>?</kbd></td><td>Show shortcuts</td></tr>
+			<tr><td><kbd>Esc</kbd></td><td>Close dialog</td></tr>
+		</tbody>
+	</table>
+</dialog>
+
+<script>
+	const modal = document.getElementById('shortcuts-modal') as HTMLDialogElement;
+
+	document.addEventListener('open-shortcuts', () => modal.showModal());
+
+	document.addEventListener('keydown', (e) => {
+		if (e.key === '?' && modal.open) modal.close();
+	});
+
+	modal.addEventListener('click', (e) => {
+		if (e.target === modal) modal.close();
+	});
+</script>
+
+<style is:global>
+	#shortcuts-modal {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: min(400px, 90vw);
+		margin: 0;
+		padding: 1.5rem;
+		background: var(--background);
+		border: 1px solid oklch(from var(--foreground) l c h / 12%);
+		border-radius: calc(var(--radius) * 1.4);
+		box-shadow: 0 8px 40px rgba(0, 0, 0, 20%);
+		z-index: 300;
+		color: var(--foreground);
+	}
+	#shortcuts-modal::backdrop {
+		background: oklch(0 0 0 / 40%);
+		backdrop-filter: blur(2px);
+	}
+	#shortcuts-modal h2 {
+		margin: 0 0 1rem 0;
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--foreground);
+	}
+	#shortcuts-modal table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+	#shortcuts-modal td {
+		padding: 0.35rem 0;
+		font-size: 0.875rem;
+		color: var(--foreground);
+	}
+	#shortcuts-modal td:first-child {
+		width: 40%;
+		white-space: nowrap;
+	}
+	#shortcuts-modal td:last-child {
+		color: var(--muted-foreground);
+	}
+	#shortcuts-modal kbd {
+		display: inline-block;
+		padding: 0.15em 0.4em;
+		background: var(--muted);
+		border: 1px solid oklch(from var(--foreground) l c h / 15%);
+		border-radius: var(--radius-sm);
+		font-family: inherit;
+		font-size: 0.8rem;
+		line-height: 1.4;
+	}
+	@media (prefers-color-scheme: dark) {
+		#shortcuts-modal {
+			box-shadow: 0 8px 40px rgba(0, 0, 0, 60%);
+		}
+		#shortcuts-modal::backdrop {
+			background: oklch(0 0 0 / 60%);
+		}
+	}
+</style>
