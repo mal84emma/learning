@@ -33,12 +33,14 @@ type Props = {
 };
 
 const { post, prevPost, nextPost } = Astro.props;
-const { Content, headings } = await render(post);
+const { Content, headings, remarkPluginFrontmatter } = await render(post);
+const readingTime: string | undefined = remarkPluginFrontmatter?.readingTime;
 ---
 
 <BlogPost
 	{...post.data}
 	headings={headings}
+	readingTime={readingTime}
 	prevPost={prevPost ? { slug: prevPost.id, shortTitle: prevPost.data.shortTitle } : undefined}
 	nextPost={nextPost ? { slug: nextPost.id, shortTitle: nextPost.data.shortTitle } : undefined}
 >

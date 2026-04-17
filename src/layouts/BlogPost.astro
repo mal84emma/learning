@@ -11,11 +11,12 @@ type Heading = { depth: number; slug: string; text: string };
 type PostNavTarget = { slug: string; shortTitle: string };
 type Props = CollectionEntry<'blog'>['data'] & {
 	headings?: Heading[];
+	readingTime?: string;
 	prevPost?: PostNavTarget;
 	nextPost?: PostNavTarget;
 };
 
-const { title, description, pubDate, updatedDate, heroImage, headings, prevPost, nextPost } =
+const { title, description, pubDate, updatedDate, heroImage, headings, readingTime, prevPost, nextPost } =
 	Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
@@ -182,6 +183,7 @@ const base = import.meta.env.BASE_URL;
 					<div class="title">
 						<div class="date">
 							<FormattedDate date={pubDate} />
+							{readingTime && <span class="reading-time"> · {readingTime}</span>}
 							{
 								updatedDate && (
 									<div class="last-updated-on">
