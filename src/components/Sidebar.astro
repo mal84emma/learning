@@ -312,6 +312,10 @@ const currentPath = Astro.url.pathname;
 		setCollapsed(!sidebar.classList.contains('collapsed'));
 	});
 
+	document.addEventListener('sidebar-set-collapsed', ((e: CustomEvent) => {
+		setCollapsed(e.detail.collapsed);
+	}) as EventListener);
+
 	// Highlight active section heading based on scroll position
 	const headingLinks = document.querySelectorAll<HTMLAnchorElement>('.heading-link');
 	if (headingLinks.length > 0) {
