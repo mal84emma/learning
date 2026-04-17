@@ -5,6 +5,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import PageScrollbar from '../components/PageScrollbar.astro';
+import Search from '../components/Search.astro';
 import Sidebar from '../components/Sidebar.astro';
 
 type Heading = { depth: number; slug: string; text: string };
@@ -272,6 +273,7 @@ const base = import.meta.env.BASE_URL;
 	<body>
 		<PageScrollbar />
 		<Sidebar headings={headings} />
+		<Search />
 		<div id="continue-banner" role="status" aria-live="polite">
 			<button id="continue-jump" aria-label="Jump back to saved position">Jump back in ↓</button>
 			<button id="continue-dismiss" aria-label="Dismiss">✕</button>
@@ -292,7 +294,7 @@ const base = import.meta.env.BASE_URL;
 				<div class="hero-image">
 					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
 				</div>
-				<div class="prose">
+				<div class="prose" data-pagefind-body>
 					<div class="title">
 						<div class="date">
 							<FormattedDate date={pubDate} />
@@ -313,7 +315,7 @@ const base = import.meta.env.BASE_URL;
 			</article>
 			{
 				(prevPost || nextPost) && (
-					<nav class="post-pagination">
+					<nav class="post-pagination" data-pagefind-ignore>
 						<div>
 							{prevPost && (
 								<a

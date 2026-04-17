@@ -17,7 +17,7 @@ const base = import.meta.env.BASE_URL;
 const currentPath = Astro.url.pathname;
 ---
 
-<aside id="sidebar">
+<aside id="sidebar" data-pagefind-ignore>
 	<script is:inline>
 		// Apply collapsed state synchronously before first paint to avoid flash
 		const savedState = localStorage.getItem('sidebar-collapsed');
@@ -37,7 +37,15 @@ const currentPath = Astro.url.pathname;
 		</svg>
 	</button>
 	<nav>
-		<h2><a href={import.meta.env.BASE_URL}>{SITE_TITLE}</a></h2>
+		<div class="nav-header">
+			<h2><a href={import.meta.env.BASE_URL}>{SITE_TITLE}</a></h2>
+			<button id="search-btn" aria-label="Search">
+				<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="11" cy="11" r="8" />
+					<line x1="21" y1="21" x2="16.65" y2="16.65" />
+				</svg>
+			</button>
+		</div>
 		<div class="nav-links">
 			{posts.map((post) => {
 				const postHref = `${base}/blog/${post.id}`;
@@ -146,9 +154,38 @@ const currentPath = Astro.url.pathname;
 	.nav-scrollbar-thumb.visible {
 		opacity: 1;
 	}
+	.nav-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding-right: 0.75em;
+		margin-bottom: 2em;
+	}
+	#search-btn {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		padding: 0;
+		background: none;
+		border: none;
+		border-radius: var(--radius-sm);
+		color: rgb(var(--gray));
+		cursor: pointer;
+		transition: color 0.2s ease;
+	}
+	#search-btn:hover {
+		color: var(--accent);
+	}
+	aside.collapsed :global(#search-btn) {
+		opacity: 0;
+		pointer-events: none;
+	}
 	h2 {
-		margin: 0 0 2em 0;
-		padding: 0 1.5em;
+		margin: 0;
+		padding: 0 0 0 1.5em;
 		font-size: 1em;
 	}
 	h2 a,
@@ -227,6 +264,14 @@ const currentPath = Astro.url.pathname;
 		h2 a,
 		h2 a.active {
 			color: rgb(var(--gray-light));
+		}
+		#search-btn {
+			color: rgb(var(--gray-light));
+			opacity: 0.6;
+		}
+		#search-btn:hover {
+			color: var(--accent);
+			opacity: 1;
 		}
 		#sidebar-toggle {
 			border-color: oklch(1 0 0 / 10%);
@@ -315,6 +360,10 @@ const currentPath = Astro.url.pathname;
 	document.addEventListener('sidebar-set-collapsed', ((e: CustomEvent) => {
 		setCollapsed(e.detail.collapsed);
 	}) as EventListener);
+
+	document.getElementById('search-btn')?.addEventListener('click', () => {
+		document.dispatchEvent(new CustomEvent('open-search'));
+	});
 
 	// Highlight active section heading based on scroll position
 	const headingLinks = document.querySelectorAll<HTMLAnchorElement>('.heading-link');

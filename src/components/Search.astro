@@ -1,0 +1,72 @@
+---
+---
+
+<dialog id="search-modal" aria-label="Search">
+	<div id="search-mount"></div>
+</dialog>
+
+<script>
+	const modal = document.getElementById('search-modal') as HTMLDialogElement;
+	let initialised = false;
+
+	async function openSearch() {
+		modal.showModal();
+		if (!initialised) {
+			initialised = true;
+			const { PagefindUI } = await import(
+				/* @vite-ignore */
+				`${import.meta.env.BASE_URL}pagefind/pagefind-ui.js`
+			);
+			new PagefindUI({ element: '#search-mount', showSubResults: true, baseUrl: import.meta.env.BASE_URL });
+		}
+		const input = modal.querySelector<HTMLInputElement>('input[type="text"]');
+		input?.focus();
+	}
+
+	document.addEventListener('open-search', openSearch);
+
+	modal.addEventListener('click', (e) => {
+		if (e.target === modal) modal.close();
+	});
+</script>
+
+<style is:global>
+	#search-modal {
+		--pagefind-ui-primary: var(--accent);
+		--pagefind-ui-text: var(--foreground);
+		--pagefind-ui-background: var(--background);
+		--pagefind-ui-border: oklch(from var(--foreground) l c h / 15%);
+		--pagefind-ui-border-width: 1px;
+		--pagefind-ui-border-radius: var(--radius);
+		--pagefind-ui-font: inherit;
+	}
+	#search-modal {
+		position: fixed;
+		top: 10vh;
+		left: 50%;
+		transform: translateX(-50%);
+		width: min(640px, 90vw);
+		max-height: 80vh;
+		margin: 0;
+		padding: 1.5rem;
+		background: var(--background);
+		border: 1px solid oklch(from var(--foreground) l c h / 12%);
+		border-radius: calc(var(--radius) * 1.4);
+		box-shadow: 0 8px 40px rgba(0, 0, 0, 20%);
+		overflow-y: auto;
+		z-index: 300;
+		color: var(--foreground);
+	}
+	#search-modal::backdrop {
+		background: oklch(0 0 0 / 40%);
+		backdrop-filter: blur(2px);
+	}
+	@media (prefers-color-scheme: dark) {
+		#search-modal {
+			box-shadow: 0 8px 40px rgba(0, 0, 0, 60%);
+		}
+		#search-modal::backdrop {
+			background: oklch(0 0 0 / 60%);
+		}
+	}
+</style>
