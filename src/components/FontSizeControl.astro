@@ -1,0 +1,70 @@
+---
+---
+
+<script is:inline>
+	const size = localStorage.getItem('learning-font-size');
+	if (size) document.documentElement.classList.add(size);
+</script>
+
+<div class="font-size-control">
+	<button class="font-size-btn" data-size="font-sm" aria-label="Decrease font size">A−</button>
+	<button class="font-size-btn" data-size="" aria-label="Default font size">A</button>
+	<button class="font-size-btn" data-size="font-lg" aria-label="Increase font size">A+</button>
+</div>
+
+<script>
+	const sizes = ['font-sm', 'font-lg'] as const;
+	let current = localStorage.getItem('learning-font-size') ?? '';
+
+	function apply(size: string) {
+		sizes.forEach((s) => document.documentElement.classList.remove(s));
+		if (size) document.documentElement.classList.add(size);
+		current = size;
+		localStorage.setItem('learning-font-size', size);
+		document.querySelectorAll<HTMLElement>('.font-size-btn').forEach((btn) => {
+			btn.classList.toggle('active', (btn.dataset.size ?? '') === current);
+		});
+	}
+
+	document.querySelectorAll<HTMLElement>('.font-size-btn').forEach((btn) => {
+		btn.addEventListener('click', () => apply(btn.dataset.size ?? ''));
+	});
+
+	apply(current);
+</script>
+
+<style>
+	.font-size-control {
+		display: flex;
+		flex-direction: row;
+		gap: 0.25em;
+		padding: 0 1.5em;
+	}
+	.font-size-btn {
+		padding: 0.2em 0.4em;
+		background: none;
+		border: none;
+		border-radius: var(--radius-sm);
+		color: rgb(var(--gray));
+		cursor: pointer;
+		font-family: inherit;
+		font-weight: 500;
+		transition: color 0.2s ease;
+		line-height: 1;
+	}
+	.font-size-btn:hover,
+	.font-size-btn.active {
+		color: var(--accent);
+	}
+	@media (prefers-color-scheme: dark) {
+		.font-size-btn {
+			color: rgb(var(--gray-light));
+			opacity: 0.6;
+		}
+		.font-size-btn:hover,
+		.font-size-btn.active {
+			color: var(--accent);
+			opacity: 1;
+		}
+	}
+</style>

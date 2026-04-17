@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { SITE_TITLE } from '../consts';
+import FontSizeControl from './FontSizeControl.astro';
 
 type Heading = { depth: number; slug: string; text: string };
 interface Props { headings?: Heading[] }
@@ -59,6 +60,7 @@ const currentPath = Astro.url.pathname;
 				);
 			})}
 		</div>
+		<FontSizeControl />
 	</nav>
 </aside>
 
@@ -202,6 +204,10 @@ const currentPath = Astro.url.pathname;
 		color: var(--accent-alt-dark);
 		opacity: 1;
 		border-left-color: var(--accent-alt-dark);
+	}
+	aside.collapsed :global(.font-size-control) {
+		opacity: 0;
+		pointer-events: none;
 	}
 	.social-links {
 		display: flex;

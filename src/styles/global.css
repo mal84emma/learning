@@ -16,6 +16,7 @@
 :root {
 	color-scheme: light dark;
 	--sidebar-width: 220px;
+	--prose-font-size: 1rem;
 	--accent: oklch(0.55 0.16 350);
 	--accent-alt: oklch(0.76 0.055 157); /* Cambridge Blue (#A3C1AD) */
 	--accent-alt-light: oklch(from var(--accent-alt) calc(l + 0.0) c h);
@@ -61,6 +62,9 @@
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
 }
+:root.font-sm { --prose-font-size: 0.9rem; }
+:root.font-lg { --prose-font-size: 1.15rem; }
+
 /* @font-face for Atkinson is injected by BaseHead.astro using import.meta.env.BASE_URL */
 html {
 	scrollbar-width: none;
