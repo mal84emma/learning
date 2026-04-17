@@ -276,6 +276,12 @@ const base = import.meta.env.BASE_URL;
 			<button id="continue-jump" aria-label="Jump back to saved position">Jump back in ↓</button>
 			<button id="continue-dismiss" aria-label="Dismiss">✕</button>
 		</div>
+		<div
+			id="post-nav-data"
+			hidden
+			data-prev-slug={prevPost?.slug ?? ''}
+			data-next-slug={nextPost?.slug ?? ''}
+		></div>
 		<button id="scroll-top-btn" aria-label="Scroll to top">
 			<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
 				<polyline points="18 15 12 9 6 15" />
@@ -403,4 +409,38 @@ const base = import.meta.env.BASE_URL;
 	if (saved > document.body.scrollHeight * 0.15 && !dismissed) {
 		banner.classList.add('visible');
 	}
+</script>
+
+<script>
+	const navData = document.getElementById('post-nav-data')!;
+	const base = import.meta.env.BASE_URL;
+	const prevSlug = navData.dataset.prevSlug;
+	const nextSlug = navData.dataset.nextSlug;
+
+	function toggleSidebar() {
+		const isCollapsed = document.getElementById('sidebar')!.classList.contains('collapsed');
+		document.dispatchEvent(
+			new CustomEvent('sidebar-set-collapsed', { detail: { collapsed: !isCollapsed } })
+		);
+	}
+
+	function openSearch() {
+		document.dispatchEvent(new CustomEvent('open-search'));
+	}
+
+	function openShortcuts() {
+		document.dispatchEvent(new CustomEvent('open-shortcuts'));
+	}
+
+	document.addEventListener('keydown', (e) => {
+		if (document.activeElement !== document.body) return;
+		if (e.metaKey || e.ctrlKey || e.altKey) return;
+		if ((e.key === 'ArrowRight' || e.key === ']') && nextSlug)
+			location.href = `${base}/blog/${nextSlug}`;
+		if ((e.key === 'ArrowLeft' || e.key === '[') && prevSlug)
+			location.href = `${base}/blog/${prevSlug}`;
+		if (e.key === 'f' || e.key === 's') toggleSidebar();
+		if (e.key === '/') { e.preventDefault(); openSearch(); }
+		if (e.key === '?') { e.preventDefault(); openShortcuts(); }
+	});
 </script>
