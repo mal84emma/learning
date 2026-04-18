@@ -4,7 +4,7 @@ import type { CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import FlashcardReview from '../components/content/FlashcardReview.astro';
+import Flashcard from '../components/content/Flashcard.astro';
 import ObjectivesBlock from '../components/content/ObjectivesBlock.astro';
 import PageScrollbar from '../components/PageScrollbar.astro';
 import Search from '../components/Search.astro';
@@ -20,7 +20,7 @@ type Props = CollectionEntry<'blog'>['data'] & {
 	nextPost?: PostNavTarget;
 };
 
-const { title, description, pubDate, updatedDate, heroImage, objectives, headings, readingTime, prevPost, nextPost } =
+const { title, description, pubDate, updatedDate, heroImage, objectives, flashcards, headings, readingTime, prevPost, nextPost } =
 	Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
@@ -270,6 +270,20 @@ const base = import.meta.env.BASE_URL;
 					box-shadow: 0 1px 4px rgba(0, 0, 0, 30%);
 				}
 			}
+			.flashcards-section {
+				margin-top: 2.5em;
+				padding-top: 1.75em;
+				border-top: 1px solid oklch(from var(--foreground) l c h / 8%);
+			}
+			.flashcards-label {
+				display: block;
+				font-size: 0.7rem;
+				font-weight: 600;
+				letter-spacing: 0.07em;
+				text-transform: uppercase;
+				color: var(--muted-foreground);
+				margin-bottom: 0.25em;
+			}
 		</style>
 	</head>
 
@@ -316,7 +330,14 @@ const base = import.meta.env.BASE_URL;
 					</div>
 					{objectives && objectives.length > 0 && <ObjectivesBlock objectives={objectives} />}
 					<slot />
-					<FlashcardReview />
+					{flashcards && flashcards.length > 0 && (
+						<div class="flashcards-section" data-pagefind-ignore>
+							<span class="flashcards-label">Review</span>
+							{flashcards.map((card) => (
+								<Flashcard front={card.front} back={card.back} />
+							))}
+						</div>
+					)}
 				</div>
 			</article>
 			{
