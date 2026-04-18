@@ -16,14 +16,19 @@ const posts = (await getCollection('blog')).sort(
 const base = import.meta.env.BASE_URL;
 const currentPath = Astro.url.pathname;
 
-const allCards = posts.flatMap((post) =>
-	(post.data.flashcards ?? []).map((card, i) => ({
-		id: `${post.id}-${i}`,
-		postTitle: post.data.shortTitle,
-		front: card.front,
-		back: card.back,
-	}))
-);
+const currentPost = posts.find((p) => currentPath === `${base}/blog/${p.id}`);
+const maxOrder = currentPost?.data.orderingNumber ?? Infinity;
+
+const allCards = posts
+	.filter((post) => post.data.orderingNumber <= maxOrder)
+	.flatMap((post) =>
+		(post.data.flashcards ?? []).map((card, i) => ({
+			id: `${post.id}-${i}`,
+			postTitle: post.data.shortTitle,
+			front: card.front,
+			back: card.back,
+		}))
+	);
 ---
 
 <aside id="sidebar" data-pagefind-ignore>
