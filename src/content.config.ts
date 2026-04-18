@@ -17,6 +17,7 @@ const blog = defineCollection({
 			orderingNumber: z.number(),
 			shortTitle: z.string(),
 			objectives: z.array(z.string()).optional(),
+			flashcards: z.array(z.object({ front: z.string(), back: z.string() })).optional(),
 		}),
 });
 
