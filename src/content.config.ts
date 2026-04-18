@@ -16,6 +16,7 @@ const blog = defineCollection({
 			heroImage: z.optional(image()),
 			orderingNumber: z.number(),
 			shortTitle: z.string(),
+			objectives: z.array(z.string()).optional(),
 		}),
 });
 
