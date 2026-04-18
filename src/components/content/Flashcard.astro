@@ -19,12 +19,12 @@ const { front, back } = Astro.props
 		<div class="flashcard-face flashcard-front">
 			<span class="flashcard-tag">Question</span>
 			<div class="flashcard-text">{front}</div>
-			<span class="flashcard-hint">click · space to reveal</span>
+			<span class="flashcard-hint">click to reveal</span>
 		</div>
 		<div class="flashcard-face flashcard-back">
 			<span class="flashcard-tag">Answer</span>
 			<div class="flashcard-text">{back}</div>
-			<span class="flashcard-hint">click · space to flip back</span>
+			<span class="flashcard-hint">click to flip back</span>
 		</div>
 	</div>
 </div>
@@ -34,7 +34,7 @@ const { front, back } = Astro.props
 		document.querySelectorAll<HTMLElement>('.flashcard').forEach((card) => {
 			card.addEventListener('click', () => card.classList.toggle('is-flipped'))
 			card.addEventListener('keydown', (e) => {
-				if (e.key === ' ' || e.key === 'Enter') {
+				if (e.key === 'Enter') {
 					e.preventDefault()
 					card.classList.toggle('is-flipped')
 				}
@@ -63,7 +63,7 @@ const { front, back } = Astro.props
 		transition: transform 0.4s ease;
 	}
 	.flashcard.is-flipped .flashcard-inner {
-		transform: rotateY(180deg);
+		transform: rotateX(180deg);
 	}
 	.flashcard-face {
 		grid-area: 1 / 1;
@@ -80,7 +80,7 @@ const { front, back } = Astro.props
 		background: var(--card);
 	}
 	.flashcard-back {
-		transform: rotateY(180deg);
+		transform: rotateX(180deg);
 		background: oklch(from var(--accent-alt) l c h / 0.06);
 		border-color: oklch(from var(--accent-alt) l c h / 0.25);
 	}

@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { SITE_TITLE } from '../consts';
+import FlashcardReview from './content/FlashcardReview.astro';
 
 type Heading = { depth: number; slug: string; text: string };
 interface Props { headings?: Heading[] }
@@ -95,64 +96,7 @@ const allCards = posts.flatMap((post) =>
 			</div>
 		)}
 	</nav>
-	{allCards.length > 0 && (
-		<>
-			<div id="fc-data" data-cards={JSON.stringify(allCards)} hidden></div>
-			<dialog id="fc-review-dialog" class="fc-review-dialog" aria-label="Flashcard review">
-				<div class="fc-panel">
-					<div class="fc-header">
-						<div class="fc-meta">
-							<span class="fc-progress" id="fc-progress"></span>
-							<span class="fc-mastery" id="fc-mastery"></span>
-						</div>
-						<button class="fc-close" id="fc-close" aria-label="Close review">
-							<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-								<line x1="18" y1="6" x2="6" y2="18"/>
-								<line x1="6" y1="6" x2="18" y2="18"/>
-							</svg>
-						</button>
-					</div>
-
-					<div class="fc-card" id="fc-card">
-						<div class="fc-card-inner" id="fc-card-inner">
-							<div class="fc-face fc-card-front">
-								<div class="fc-face-header">
-									<span class="fc-face-tag">Question</span>
-									<span class="fc-post-title" id="fc-post-title"></span>
-								</div>
-								<div class="fc-face-text" id="fc-front-text"></div>
-								<span class="fc-face-hint">click or press space to reveal</span>
-							</div>
-							<div class="fc-face fc-card-back">
-								<span class="fc-face-tag">Answer</span>
-								<div class="fc-face-text" id="fc-back-text"></div>
-							</div>
-						</div>
-					</div>
-
-					<div class="fc-actions" id="fc-actions" hidden>
-						<button class="fc-btn fc-btn-again" id="fc-again">
-							<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.41"/></svg>
-							Again
-						</button>
-						<button class="fc-btn fc-btn-got-it" id="fc-got-it">
-							Got it
-							<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-						</button>
-					</div>
-
-					<div class="fc-summary" id="fc-summary" hidden>
-						<p class="fc-summary-title">Round complete</p>
-						<p class="fc-summary-score" id="fc-summary-score"></p>
-						<div class="fc-summary-btns">
-							<button class="fc-btn fc-btn-again" id="fc-restart">Review again</button>
-							<button class="fc-btn fc-btn-got-it" id="fc-done">Done</button>
-						</div>
-					</div>
-				</div>
-			</dialog>
-		</>
-	)}
+	{allCards.length > 0 && <FlashcardReview cards={allCards} />}
 </aside>
 
 <style>
@@ -362,6 +306,8 @@ const allCards = posts.flatMap((post) =>
 	/* Review button */
 	.nav-footer {
 		margin-top: auto;
+		display: flex;
+		justify-content: center;
 		padding: 0.75em 1.5em 1em;
 		border-top: 1px solid oklch(from var(--foreground) l c h / 7%);
 	}
@@ -389,180 +335,6 @@ const allCards = posts.flatMap((post) =>
 		background: oklch(from var(--foreground) l c h / 8%);
 		border-radius: 999px;
 		font-size: 0.75em;
-	}
-
-	/* Review dialog */
-	:global(.fc-review-dialog) {
-		margin: auto;
-		width: min(620px, calc(100vw - 2rem));
-		padding: 0;
-		background: var(--background);
-		border: 1px solid oklch(from var(--foreground) l c h / 12%);
-		border-radius: var(--radius-2xl);
-		box-shadow: 0 16px 64px oklch(0 0 0 / 18%);
-		overflow: clip;
-	}
-	:global(.fc-review-dialog::backdrop) {
-		background: oklch(0 0 0 / 50%);
-		backdrop-filter: blur(4px);
-		-webkit-backdrop-filter: blur(4px);
-	}
-	.fc-panel {
-		display: flex;
-		flex-direction: column;
-		gap: 1.25rem;
-		padding: 1.5rem;
-	}
-	.fc-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-	.fc-meta {
-		display: flex;
-		gap: 1.25rem;
-		font-size: 0.8rem;
-		color: var(--muted-foreground);
-	}
-	.fc-close {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 2rem;
-		height: 2rem;
-		padding: 0;
-		background: none;
-		border: none;
-		border-radius: var(--radius-md);
-		color: var(--muted-foreground);
-		cursor: pointer;
-		transition: background 0.15s, color 0.15s;
-	}
-	.fc-close:hover {
-		background: oklch(from var(--foreground) l c h / 8%);
-		color: var(--foreground);
-	}
-	.fc-card {
-		perspective: 1200px;
-		cursor: pointer;
-	}
-	.fc-card-inner {
-		display: grid;
-		min-height: 9rem;
-		transform-style: preserve-3d;
-		transition: transform 0.4s ease;
-	}
-	.fc-card-inner.is-flipped {
-		transform: rotateX(180deg);
-	}
-	.fc-face {
-		grid-area: 1 / 1;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		padding: 1.25rem 1.5rem;
-		border: 1px solid oklch(from var(--foreground) l c h / 12%);
-		border-radius: var(--radius-xl);
-		backface-visibility: hidden;
-		-webkit-backface-visibility: hidden;
-	}
-	.fc-card-front {
-		background: var(--card);
-	}
-	.fc-card-back {
-		transform: rotateX(180deg);
-		background: oklch(from var(--accent-alt) l c h / 0.06);
-		border-color: oklch(from var(--accent-alt) l c h / 0.25);
-	}
-	.fc-card-mastered .fc-card-front {
-		border-color: oklch(from var(--accent-alt) l c h / 0.4);
-		background: oklch(from var(--accent-alt) l c h / 0.04);
-	}
-	.fc-face-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-		margin-bottom: 0.5rem;
-	}
-	.fc-face-tag {
-		font-size: 0.7rem;
-		font-weight: 600;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-	}
-	.fc-card-front .fc-face-tag { color: var(--accent); }
-	.fc-card-back .fc-face-tag { color: var(--accent-alt-dark); }
-	.fc-post-title {
-		font-size: 0.65rem;
-		color: var(--muted-foreground);
-		opacity: 0.7;
-	}
-	.fc-face-text {
-		flex: 1;
-		font-size: 1.05rem;
-		line-height: 1.5;
-		color: var(--foreground);
-	}
-	.fc-face-hint {
-		margin-top: 0.75rem;
-		font-size: 0.7rem;
-		color: var(--muted-foreground);
-		text-align: right;
-		opacity: 0.5;
-	}
-	.fc-actions {
-		display: flex;
-		gap: 0.75rem;
-	}
-	.fc-btn {
-		flex: 1;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.4em;
-		padding: 0.6em 1em;
-		border-radius: var(--radius-xl);
-		font-family: inherit;
-		font-size: 0.875rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: background 0.15s, color 0.15s;
-	}
-	.fc-btn-again {
-		background: color-mix(in oklch, var(--input) 30%, transparent);
-		border: 1px solid oklch(from var(--foreground) l c h / 12%);
-		color: var(--foreground);
-	}
-	.fc-btn-again:hover { background: color-mix(in oklch, var(--input) 55%, transparent); }
-	.fc-btn-got-it {
-		background: oklch(from var(--accent-alt) l c h / 0.12);
-		border: 1px solid oklch(from var(--accent-alt) l c h / 0.3);
-		color: var(--accent-alt-dark);
-	}
-	.fc-btn-got-it:hover { background: oklch(from var(--accent-alt) l c h / 0.22); }
-	.fc-summary {
-		padding: 0.5rem 0 0.75rem;
-		text-align: center;
-	}
-	.fc-summary-title {
-		font-size: 1rem;
-		font-weight: 600;
-		color: var(--foreground);
-		margin: 0 0 0.25rem;
-	}
-	.fc-summary-score {
-		color: var(--muted-foreground);
-		font-size: 0.875rem;
-		margin: 0 0 1.25rem;
-	}
-	.fc-summary-btns {
-		display: flex;
-		justify-content: center;
-		gap: 0.75rem;
-	}
-	.fc-summary-btns .fc-btn {
-		flex: 0 0 auto;
-		padding: 0.6em 1.5em;
 	}
 
 	@media (prefers-color-scheme: dark) {
@@ -606,15 +378,6 @@ const allCards = posts.flatMap((post) =>
 		.nav-links :global(a.heading-link[data-visited]:not(.active-section)) {
 			opacity: 0.35;
 		}
-		:global(.fc-review-dialog) {
-			box-shadow: 0 16px 64px oklch(0 0 0 / 50%);
-		}
-		:global(.fc-review-dialog::backdrop) {
-			background: oklch(0 0 0 / 65%);
-		}
-		.fc-card-back .fc-face-tag { color: var(--accent-alt-light); }
-		.fc-card-back { background: oklch(from var(--accent-alt) l c h / 0.1); }
-		.fc-btn-got-it { color: var(--accent-alt-light); }
 		.fc-review-btn { color: rgb(var(--gray-light)); opacity: 0.6; }
 		.fc-review-btn:hover { color: var(--accent); opacity: 1; }
 	}
@@ -626,7 +389,6 @@ const allCards = posts.flatMap((post) =>
 	let abort = new AbortController();
 
 	document.addEventListener('astro:before-swap', () => {
-		document.body.style.overflow = '';
 		abort.abort();
 		abort = new AbortController();
 	});
@@ -691,152 +453,9 @@ const allCards = posts.flatMap((post) =>
 			document.dispatchEvent(new CustomEvent('open-shortcuts'));
 		}, { signal });
 
-		// ── Global flashcard review ──────────────────────────────────────────
-		const fcData = document.getElementById('fc-data')
-		const reviewBtn = document.getElementById('fc-review-btn') as HTMLButtonElement | null
-		const reviewDialog = document.getElementById('fc-review-dialog') as HTMLDialogElement | null
-
-		if (fcData && reviewBtn && reviewDialog) {
-			type Card = { id: string; postTitle: string; front: string; back: string }
-			const allCards: Card[] = JSON.parse(fcData.dataset.cards ?? '[]')
-
-			function shuffle(arr: Card[]): Card[] {
-				const a = [...arr]
-				for (let i = a.length - 1; i > 0; i--) {
-					const j = Math.floor(Math.random() * (i + 1))
-					;[a[i], a[j]] = [a[j], a[i]]
-				}
-				return a
-			}
-
-			const storageKey = 'learning-flashcards-global'
-			const getMastered = () =>
-				new Set<string>(JSON.parse(localStorage.getItem(storageKey) ?? '[]') as string[])
-			const saveMastered = (m: Set<string>) =>
-				localStorage.setItem(storageKey, JSON.stringify([...m]))
-
-			const progressEl = document.getElementById('fc-progress')
-			const masteryEl  = document.getElementById('fc-mastery')
-			const cardEl     = document.getElementById('fc-card')
-			const cardInner  = document.getElementById('fc-card-inner')
-			const postTitleEl= document.getElementById('fc-post-title')
-			const frontText  = document.getElementById('fc-front-text')
-			const backText   = document.getElementById('fc-back-text')
-			const actionsEl  = document.getElementById('fc-actions')
-			const againBtn   = document.getElementById('fc-again')   as HTMLButtonElement | null
-			const gotItBtn   = document.getElementById('fc-got-it')  as HTMLButtonElement | null
-			const summaryEl  = document.getElementById('fc-summary')
-			const summaryScore = document.getElementById('fc-summary-score')
-			const restartBtn = document.getElementById('fc-restart') as HTMLButtonElement | null
-			const doneBtn    = document.getElementById('fc-done')    as HTMLButtonElement | null
-			const closeBtn   = document.getElementById('fc-close')   as HTMLButtonElement | null
-
-			let queue: Card[] = []
-			let queuePos = 0
-			let mastered = new Set<string>()
-			let isFlipped = false
-
-			function updateMeta() {
-				if (progressEl) progressEl.textContent = `${queuePos + 1} / ${queue.length}`
-				if (masteryEl)  masteryEl.textContent  = `${mastered.size} mastered`
-			}
-
-			function showCard(pos: number) {
-				const card = queue[pos]
-				isFlipped = false
-				cardInner?.classList.remove('is-flipped')
-				if (frontText)   frontText.textContent   = card.front
-				if (backText)    backText.textContent    = card.back
-				if (postTitleEl) postTitleEl.textContent = card.postTitle
-				if (actionsEl)   actionsEl.hidden        = true
-				cardEl?.classList.toggle('fc-card-mastered', mastered.has(card.id))
-				updateMeta()
-			}
-
-			function flip() {
-				if (isFlipped) return
-				isFlipped = true
-				cardInner?.classList.add('is-flipped')
-				if (actionsEl) actionsEl.hidden = false
-				setTimeout(() => gotItBtn?.focus(), 50)
-			}
-
-			function advance() {
-				queuePos++
-				if (queuePos >= queue.length) showSummary()
-				else showCard(queuePos)
-			}
-
-			function showSummary() {
-				if (cardEl)    cardEl.hidden    = true
-				if (actionsEl) actionsEl.hidden = true
-				if (progressEl) progressEl.textContent = 'Done!'
-				if (masteryEl)  masteryEl.textContent  = ''
-				if (summaryEl)  summaryEl.hidden       = false
-				if (summaryScore) summaryScore.textContent = `${mastered.size} of ${allCards.length} mastered`
-				setTimeout(() => doneBtn?.focus(), 50)
-			}
-
-			function openReview() {
-				mastered = getMastered()
-				queue = shuffle(allCards)
-				queuePos = 0
-				if (cardEl)    cardEl.hidden    = false
-				if (summaryEl) summaryEl.hidden = true
-				reviewDialog.showModal()
-				document.body.style.overflow = 'hidden'
-				showCard(0)
-			}
-
-			function closeReview() {
-				reviewDialog.close()
-				document.body.style.overflow = ''
-				reviewBtn.focus()
-			}
-
-			reviewBtn.addEventListener('click', openReview, { signal })
-			closeBtn?.addEventListener('click', closeReview, { signal })
-			cardEl?.addEventListener('click', () => flip(), { signal })
-
-			againBtn?.addEventListener('click', () => {
-				mastered.delete(queue[queuePos].id)
-				saveMastered(mastered)
-				advance()
-			}, { signal })
-
-			gotItBtn?.addEventListener('click', () => {
-				mastered.add(queue[queuePos].id)
-				saveMastered(mastered)
-				advance()
-			}, { signal })
-
-			restartBtn?.addEventListener('click', openReview, { signal })
-			doneBtn?.addEventListener('click', closeReview, { signal })
-
-			reviewDialog.addEventListener('close', () => {
-				document.body.style.overflow = ''
-				reviewBtn.focus()
-			}, { signal })
-
-			document.addEventListener('keydown', (e) => {
-				const active = document.activeElement as HTMLElement | null
-				if (reviewDialog.open) {
-					if ((e.key === ' ' || e.key === 'Enter') && active?.tagName !== 'BUTTON') {
-						e.preventDefault()
-						flip()
-					}
-					if (!actionsEl?.hidden) {
-						if (e.key === 'g' || e.key === 'y') gotItBtn?.click()
-						if (e.key === 'n') againBtn?.click()
-					}
-				} else {
-					const inInput = active && ['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName)
-					if (e.key === 'r' && !inInput && !active?.isContentEditable && !document.querySelector('dialog[open]')) {
-						openReview()
-					}
-				}
-			}, { signal })
-		}
+		document.getElementById('fc-review-btn')?.addEventListener('click', () => {
+			document.dispatchEvent(new CustomEvent('open-flashcard-review'));
+		}, { signal });
 
 		// Section tracking
 		const headingLinks = document.querySelectorAll<HTMLAnchorElement>('.heading-link');
