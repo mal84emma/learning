@@ -21,6 +21,11 @@ import AstroSearch from "astro-pagefind/components/Search";
 	modal.addEventListener('click', (e) => {
 		if (e.target === modal) modal.close();
 	});
+
+	// Close whenever a View Transitions navigation completes.
+	document.addEventListener('astro:page-load', () => {
+		if (modal.open) modal.close();
+	});
 </script>
 
 <style is:global>

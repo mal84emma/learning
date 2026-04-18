@@ -274,8 +274,8 @@ const base = import.meta.env.BASE_URL;
 	<body>
 		<PageScrollbar />
 		<Sidebar headings={headings} />
-		<Search />
-		<ShortcutsModal />
+		<Search transition:persist="search" />
+		<ShortcutsModal transition:persist="shortcuts" />
 		<div id="continue-banner" role="status" aria-live="polite">
 			<button id="continue-jump" aria-label="Jump back to saved position">Jump back in ↓</button>
 			<button id="continue-dismiss" aria-label="Dismiss">✕</button>
@@ -291,7 +291,7 @@ const base = import.meta.env.BASE_URL;
 				<polyline points="18 15 12 9 6 15" />
 			</svg>
 		</button>
-		<main>
+		<main transition:animate="fade">
 			<article>
 				<div class="hero-image">
 					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
@@ -359,67 +359,77 @@ const base = import.meta.env.BASE_URL;
 </html>
 
 <script>
-	const scrollTopBtn = document.getElementById('scroll-top-btn')!;
-	let scrollTopVisible = false;
-
+	// Scroll-to-top: element persists via View Transitions morphing; look it up live in the
+	// scroll handler to avoid a stale reference on the rare case it doesn't.
 	window.addEventListener('scroll', () => {
-		const shouldShow = window.scrollY > 400;
-		if (shouldShow !== scrollTopVisible) {
-			scrollTopVisible = shouldShow;
-			scrollTopBtn.classList.toggle('visible', scrollTopVisible);
-		}
+		document.getElementById('scroll-top-btn')?.classList.toggle('visible', window.scrollY > 400);
 	}, { passive: true });
 
-	scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+	document.addEventListener('astro:page-load', () => {
+		document.getElementById('scroll-top-btn')?.addEventListener('click', () => {
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		});
+	});
 </script>
 
 <script>
-	const banner = document.getElementById('continue-banner')!;
-	const jumpBtn = document.getElementById('continue-jump')!;
-	const dismissBtn = document.getElementById('continue-dismiss')!;
-	const storageKey = `learning-scroll-${window.location.pathname}`;
-	const dismissKey = `learning-scroll-dismissed-${window.location.pathname}`;
-
+	// Scroll position save: read pathname on every scroll event so the correct key is used
+	// after View Transitions navigations.
 	let rafPending = false;
 	window.addEventListener('scroll', () => {
 		if (!rafPending) {
 			rafPending = true;
 			requestAnimationFrame(() => {
-				localStorage.setItem(storageKey, String(window.scrollY));
+				localStorage.setItem(`learning-scroll-${window.location.pathname}`, String(window.scrollY));
 				rafPending = false;
 			});
 		}
 	}, { passive: true });
 
-	function hideBanner() {
-		banner.classList.remove('visible');
-	}
+	// Continue banner: re-initialise per navigation using AbortController so handlers from
+	// a previous page are cleaned up before the new page's handlers are attached.
+	let bannerAbort = new AbortController();
 
-	dismissBtn.addEventListener('click', () => {
-		sessionStorage.setItem(dismissKey, 'true');
-		hideBanner();
+	document.addEventListener('astro:before-swap', () => {
+		bannerAbort.abort();
+		bannerAbort = new AbortController();
 	});
 
-	jumpBtn.addEventListener('click', () => {
+	document.addEventListener('astro:page-load', () => {
+		const banner = document.getElementById('continue-banner');
+		const jumpBtn = document.getElementById('continue-jump');
+		const dismissBtn = document.getElementById('continue-dismiss');
+		if (!banner || !jumpBtn || !dismissBtn) return;
+
+		const storageKey = `learning-scroll-${window.location.pathname}`;
+		const dismissKey = `learning-scroll-dismissed-${window.location.pathname}`;
+		const { signal } = bannerAbort;
+
+		function hideBanner() { banner.classList.remove('visible'); }
+
+		dismissBtn.addEventListener('click', () => {
+			sessionStorage.setItem(dismissKey, 'true');
+			hideBanner();
+		}, { signal });
+
+		jumpBtn.addEventListener('click', () => {
+			window.scrollTo({ top: Number(localStorage.getItem(storageKey)), behavior: 'smooth' });
+			hideBanner();
+		}, { signal });
+
+		window.addEventListener('scroll', hideBanner, { passive: true, once: true, signal });
+
 		const saved = Number(localStorage.getItem(storageKey));
-		window.scrollTo({ top: saved, behavior: 'smooth' });
-		hideBanner();
+		if (saved > document.body.scrollHeight * 0.15 && !sessionStorage.getItem(dismissKey)) {
+			banner.classList.add('visible');
+		} else {
+			banner.classList.remove('visible');
+		}
 	});
-
-	window.addEventListener('scroll', hideBanner, { passive: true, once: true });
-
-	const saved = Number(localStorage.getItem(storageKey));
-	const dismissed = sessionStorage.getItem(dismissKey);
-	if (saved > document.body.scrollHeight * 0.15 && !dismissed) {
-		banner.classList.add('visible');
-	}
 </script>
 
 <script>
-	const navData = document.getElementById('post-nav-data')!;
 	const base = import.meta.env.BASE_URL;
-	const prevSlug = navData.dataset.prevSlug;
-	const nextSlug = navData.dataset.nextSlug;
 
 	function toggleSidebar() {
 		const isCollapsed = document.getElementById('sidebar')!.classList.contains('collapsed');
@@ -428,13 +438,8 @@ const base = import.meta.env.BASE_URL;
 		);
 	}
 
-	function openSearch() {
-		document.dispatchEvent(new CustomEvent('open-search'));
-	}
-
-	function openShortcuts() {
-		document.dispatchEvent(new CustomEvent('open-shortcuts'));
-	}
+	function openSearch() { document.dispatchEvent(new CustomEvent('open-search')); }
+	function openShortcuts() { document.dispatchEvent(new CustomEvent('open-shortcuts')); }
 
 	document.addEventListener('keydown', (e) => {
 		const el = document.activeElement as HTMLElement | null;
@@ -442,6 +447,10 @@ const base = import.meta.env.BASE_URL;
 		if (el?.isContentEditable) return;
 		if (document.querySelector('dialog[open]')) return;
 		if (e.metaKey || e.ctrlKey || e.altKey) return;
+		// Read slugs from the DOM each keypress so they're always current after navigations.
+		const navData = document.getElementById('post-nav-data');
+		const prevSlug = navData?.dataset.prevSlug;
+		const nextSlug = navData?.dataset.nextSlug;
 		if ((e.key === 'ArrowRight' || e.key === ']') && nextSlug)
 			location.href = `${base}/blog/${nextSlug}`;
 		if ((e.key === 'ArrowLeft' || e.key === '[') && prevSlug)
