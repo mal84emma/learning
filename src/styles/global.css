@@ -16,7 +16,7 @@
 :root {
 	color-scheme: light dark;
 	--sidebar-width: 220px;
-	--prose-font-size: 1rem;
+	--prose-font-size: 1.25rem;
 	--accent: oklch(0.55 0.16 350);
 	--accent-alt: oklch(0.76 0.055 157); /* Cambridge Blue (#A3C1AD) */
 	--accent-alt-light: oklch(from var(--accent-alt) calc(l + 0.0) c h);
@@ -53,6 +53,13 @@
 	--chart-4: oklch(0.371 0 0);
 	--chart-5: oklch(0.269 0 0);
 	--radius: 0.625rem;
+	--radius-sm: calc(var(--radius) * 0.6);
+	--radius-md: calc(var(--radius) * 0.8);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) * 1.4);
+	--radius-2xl: calc(var(--radius) * 1.8);
+	--radius-3xl: calc(var(--radius) * 2.2);
+	--radius-4xl: calc(var(--radius) * 2.6);
 	--sidebar: oklch(0.985 0 0);
 	--sidebar-foreground: oklch(0.145 0 0);
 	--sidebar-primary: oklch(0.205 0 0);
@@ -62,10 +69,10 @@
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
 }
-:root.font-xs { --prose-font-size: 0.825rem; }
-:root.font-sm { --prose-font-size: 0.9rem; }
-:root.font-lg { --prose-font-size: 1.15rem; }
-:root.font-xl { --prose-font-size: 1.3rem; }
+:root.font-xs { --prose-font-size: 0.8rem; }
+:root.font-sm { --prose-font-size: 1rem; }
+:root.font-lg { --prose-font-size: 1.5rem; }
+:root.font-xl { --prose-font-size: 1.75rem; }
 
 /* @font-face for Atkinson is injected by BaseHead.astro using import.meta.env.BASE_URL */
 html {

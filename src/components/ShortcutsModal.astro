@@ -19,6 +19,7 @@
 			<tr><td><kbd>→</kbd> / <kbd>]</kbd></td><td>Next post</td></tr>
 			<tr><td><kbd>←</kbd> / <kbd>[</kbd></td><td>Previous post</td></tr>
 			<tr><td><kbd>f</kbd> / <kbd>s</kbd></td><td>Toggle sidebar</td></tr>
+			<tr><td><kbd>+</kbd> / <kbd>-</kbd></td><td>Increase / decrease text size</td></tr>
 			<tr><td><kbd>/</kbd></td><td>Open search</td></tr>
 			<tr><td><kbd>?</kbd></td><td>Show shortcuts</td></tr>
 			<tr><td><kbd>Esc</kbd></td><td>Close dialog</td></tr>
@@ -86,6 +87,12 @@
 	document.addEventListener('click', (e) => {
 		const modal = getModal();
 		if (modal?.open && e.target === modal) modal.close();
+	});
+
+	document.addEventListener('font-size-step', (e) => {
+		const { delta } = (e as CustomEvent<{ delta: number }>).detail;
+		const idx = fontSizes.indexOf(getCurrentSize());
+		applySize(fontSizes[Math.max(0, Math.min(fontSizes.length - 1, idx + delta))]);
 	});
 </script>
 
