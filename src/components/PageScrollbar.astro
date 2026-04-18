@@ -27,18 +27,28 @@
 </style>
 
 <script>
-	const pageThumb = document.getElementById('page-scrollbar-thumb')!;
+	let abortController: AbortController | null = null;
 
-	function updatePageThumb() {
-		const scrollHeight = document.documentElement.scrollHeight;
-		const clientHeight = window.innerHeight;
-		const ratio = clientHeight / scrollHeight;
-		const thumbHeight = clientHeight * ratio;
-		const thumbTop = (window.scrollY / scrollHeight) * clientHeight;
-		pageThumb.style.height = `${thumbHeight}px`;
-		pageThumb.style.top = `${thumbTop}px`;
+	function initScrollbar() {
+		abortController?.abort();
+		abortController = new AbortController();
+
+		const pageThumb = document.getElementById('page-scrollbar-thumb');
+		if (!pageThumb) return;
+
+		function updatePageThumb() {
+			const scrollHeight = document.documentElement.scrollHeight;
+			const clientHeight = window.innerHeight;
+			const ratio = clientHeight / scrollHeight;
+			const thumbHeight = clientHeight * ratio;
+			const thumbTop = (window.scrollY / scrollHeight) * clientHeight;
+			pageThumb.style.height = `${thumbHeight}px`;
+			pageThumb.style.top = `${thumbTop}px`;
+		}
+
+		window.addEventListener('scroll', updatePageThumb, { passive: true, signal: abortController.signal });
+		updatePageThumb();
 	}
 
-	window.addEventListener('scroll', updatePageThumb, { passive: true });
-	updatePageThumb();
+	document.addEventListener('astro:page-load', initScrollbar);
 </script>
