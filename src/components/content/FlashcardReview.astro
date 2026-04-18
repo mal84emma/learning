@@ -38,7 +38,7 @@ const { cards } = Astro.props;
 			</div>
 		</div>
 
-		<div class="fc-actions" id="fc-actions" hidden>
+		<div class="fc-actions" id="fc-actions">
 			<button class="fc-btn fc-btn-again" id="fc-again">
 				<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.41"/></svg>
 				Try again
@@ -125,17 +125,19 @@ const { cards } = Astro.props;
 			if (frontText)   frontText.textContent   = card.front;
 			if (backText)    backText.textContent    = card.back;
 			if (postTitleEl) postTitleEl.textContent = card.postTitle;
-			if (actionsEl)   actionsEl.hidden        = true;
+			actionsEl?.classList.remove('is-visible');
 			cardEl?.classList.toggle('fc-card-mastered', mastered.has(card.id));
 			updateMeta();
 		}
 
 		function flip() {
-			if (isFlipped) return;
+			if (isFlipped || cardInner?.classList.contains('is-unflipping')) return;
 			isFlipped = true;
 			cardInner?.classList.add('is-flipped');
-			if (actionsEl) actionsEl.hidden = false;
-			setTimeout(() => gotItBtn?.focus(), 50);
+			setTimeout(() => {
+				actionsEl?.classList.add('is-visible');
+				gotItBtn?.focus();
+			}, 400);
 		}
 
 		function advance() {
@@ -146,7 +148,7 @@ const { cards } = Astro.props;
 
 		function showSummary() {
 			if (cardEl)     cardEl.hidden              = true;
-			if (actionsEl)  actionsEl.hidden           = true;
+			actionsEl?.classList.remove('is-visible');
 			if (progressEl) progressEl.textContent     = 'Done!';
 			if (masteryEl)  masteryEl.textContent      = '';
 			if (summaryEl)  summaryEl.hidden           = false;
@@ -163,6 +165,9 @@ const { cards } = Astro.props;
 			reviewDialog!.showModal();
 			document.body.style.overflow = 'hidden';
 			showCard(0);
+			requestAnimationFrame(() => {
+				reviewDialog!.style.marginTop = reviewDialog!.getBoundingClientRect().top + 'px';
+			});
 		}
 
 		function closeReview() {
@@ -179,7 +184,9 @@ const { cards } = Astro.props;
 			saveMastered(mastered);
 			isFlipped = false;
 			cardInner?.classList.remove('is-flipped');
-			if (actionsEl) actionsEl.hidden = true;
+			cardInner?.classList.add('is-unflipping');
+			actionsEl?.classList.remove('is-visible');
+			setTimeout(() => cardInner?.classList.remove('is-unflipping'), 400);
 		}, { signal });
 
 		gotItBtn?.addEventListener('click', () => {
@@ -193,6 +200,7 @@ const { cards } = Astro.props;
 
 		reviewDialog.addEventListener('close', () => {
 			document.body.style.overflow = '';
+			reviewDialog.style.marginTop = '';
 		}, { signal });
 
 		document.addEventListener('keydown', (e) => {
@@ -202,7 +210,7 @@ const { cards } = Astro.props;
 					e.preventDefault();
 					flip();
 				}
-				if (!actionsEl?.hidden) {
+				if (actionsEl?.classList.contains('is-visible')) {
 					if (e.key === 'g' || e.key === 'y') gotItBtn?.click();
 					if (e.key === 'n') againBtn?.click();
 				}
@@ -274,11 +282,6 @@ const { cards } = Astro.props;
 	.fc-card-inner {
 		display: grid;
 		min-height: 9rem;
-		transform-style: preserve-3d;
-		transition: transform 0.4s ease;
-	}
-	.fc-card-inner.is-flipped {
-		transform: rotateX(180deg);
 	}
 	.fc-face {
 		grid-area: 1 / 1;
@@ -288,20 +291,83 @@ const { cards } = Astro.props;
 		padding: 1rem 1.5rem;
 		border: 1px solid oklch(from var(--foreground) l c h / 12%);
 		border-radius: var(--radius-xl);
-		backface-visibility: hidden;
-		-webkit-backface-visibility: hidden;
 	}
 	.fc-card-front {
 		background: var(--card);
 	}
 	.fc-card-back {
-		transform: rotateX(180deg);
+		visibility: hidden;
 		background: oklch(from var(--accent-alt) l c h / 0.06);
 		border-color: oklch(from var(--accent-alt) l c h / 0.25);
 	}
 	.fc-card-mastered .fc-card-front {
 		border-color: oklch(from var(--accent-alt) l c h / 0.4);
 		background: oklch(from var(--accent-alt) l c h / 0.04);
+	}
+	@keyframes fc-flip-out {
+		from { transform: rotateX(0deg); }
+		to   { transform: rotateX(-90deg); }
+	}
+	@keyframes fc-flip-in {
+		from { transform: rotateX(90deg); }
+		to   { transform: rotateX(0deg); }
+	}
+	@keyframes fc-flip-reverse-out {
+		from { transform: rotateX(0deg); }
+		to   { transform: rotateX(90deg); }
+	}
+	@keyframes fc-flip-reverse-in {
+		from { transform: rotateX(-90deg); }
+		to   { transform: rotateX(0deg); }
+	}
+	.fc-card-inner.is-flipped .fc-card-front {
+		animation: fc-flip-out 0.2s ease forwards;
+		visibility: hidden;
+		transition: visibility 0s 0.2s;
+	}
+	.fc-card-inner.is-flipped .fc-card-back {
+		visibility: visible;
+		animation: fc-flip-in 0.2s ease 0.2s both;
+	}
+	.fc-card-inner.is-unflipping .fc-card-back {
+		animation: fc-flip-reverse-out 0.2s ease forwards;
+		visibility: hidden;
+		transition: visibility 0s 0.2s;
+	}
+	.fc-card-inner.is-unflipping .fc-card-front {
+		visibility: visible;
+		animation: fc-flip-reverse-in 0.2s ease 0.2s both;
+	}
+	.fc-card-front .fc-face-header,
+	.fc-card-front .fc-face-text,
+	.fc-card-front {
+		transition: opacity 0.2s ease;
+	}
+	.fc-card-inner.is-flipped .fc-card-front .fc-face-header,
+	.fc-card-inner.is-flipped .fc-card-front .fc-face-text,
+	.fc-card-inner.is-flipped .fc-card-front {
+		opacity: 0;
+	}
+	.fc-card-inner.is-unflipping .fc-card-front .fc-face-header,
+	.fc-card-inner.is-unflipping .fc-card-front .fc-face-text,
+	.fc-card-inner.is-unflipping .fc-card-front {
+		opacity: 1;
+		transition: opacity 0.2s ease 0.2s;
+	}
+	.fc-card-back .fc-face-tag,
+	.fc-card-back .fc-face-text {
+		opacity: 0;
+		transition: opacity 0.2s ease;
+	}
+	.fc-card-inner.is-flipped .fc-card-back .fc-face-tag,
+	.fc-card-inner.is-flipped .fc-card-back .fc-face-text {
+		opacity: 1;
+		transition: opacity 0.2s ease 0.2s;
+	}
+	.fc-card-inner.is-unflipping .fc-card-back .fc-face-tag,
+	.fc-card-inner.is-unflipping .fc-card-back .fc-face-text {
+		opacity: 0;
+		transition: opacity 0.2s ease;
 	}
 	.fc-face-header {
 		display: flex;
@@ -338,6 +404,19 @@ const { cards } = Astro.props;
 	.fc-actions {
 		display: flex;
 		gap: 0.75rem;
+		max-height: 0;
+		overflow: hidden;
+		opacity: 0;
+		margin-top: -0.75rem;
+		pointer-events: none;
+		transition: max-height 0.5s ease, opacity 0.25s ease, margin-top 0.5s ease;
+	}
+	.fc-actions.is-visible {
+		max-height: 4rem;
+		opacity: 1;
+		margin-top: 0;
+		pointer-events: auto;
+		transition: max-height 0.5s ease, opacity 0.25s ease, margin-top 0.5s ease;
 	}
 	.fc-btn {
 		flex: 1;
