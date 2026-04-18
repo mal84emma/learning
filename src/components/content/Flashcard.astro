@@ -1,0 +1,120 @@
+---
+interface Props {
+	front: string
+	back: string
+}
+const { front, back } = Astro.props
+---
+
+<div
+	class="flashcard"
+	role="button"
+	tabindex="0"
+	aria-label="Flashcard. Press space or click to flip."
+	data-flashcard
+	data-front={front}
+	data-back={back}
+>
+	<div class="flashcard-inner">
+		<div class="flashcard-face flashcard-front">
+			<span class="flashcard-tag">Question</span>
+			<div class="flashcard-text">{front}</div>
+			<span class="flashcard-hint">click · space to reveal</span>
+		</div>
+		<div class="flashcard-face flashcard-back">
+			<span class="flashcard-tag">Answer</span>
+			<div class="flashcard-text">{back}</div>
+			<span class="flashcard-hint">click · space to flip back</span>
+		</div>
+	</div>
+</div>
+
+<script>
+	document.addEventListener('astro:page-load', () => {
+		document.querySelectorAll<HTMLElement>('.flashcard').forEach((card) => {
+			card.addEventListener('click', () => card.classList.toggle('is-flipped'))
+			card.addEventListener('keydown', (e) => {
+				if (e.key === ' ' || e.key === 'Enter') {
+					e.preventDefault()
+					card.classList.toggle('is-flipped')
+				}
+			})
+		})
+	})
+</script>
+
+<style>
+	.flashcard {
+		margin: 1.5em 0;
+		cursor: pointer;
+		user-select: none;
+		perspective: 1200px;
+		outline: none;
+	}
+	.flashcard:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 4px;
+		border-radius: var(--radius-2xl);
+	}
+	.flashcard-inner {
+		display: grid;
+		min-height: 7rem;
+		transform-style: preserve-3d;
+		transition: transform 0.4s ease;
+	}
+	.flashcard.is-flipped .flashcard-inner {
+		transform: rotateY(180deg);
+	}
+	.flashcard-face {
+		grid-area: 1 / 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		padding: 1.25rem 1.5rem;
+		border: 1px solid oklch(from var(--foreground) l c h / 12%);
+		border-radius: var(--radius-2xl);
+		backface-visibility: hidden;
+		-webkit-backface-visibility: hidden;
+	}
+	.flashcard-front {
+		background: var(--card);
+	}
+	.flashcard-back {
+		transform: rotateY(180deg);
+		background: oklch(from var(--accent-alt) l c h / 0.06);
+		border-color: oklch(from var(--accent-alt) l c h / 0.25);
+	}
+	.flashcard-tag {
+		font-size: 0.7rem;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		margin-bottom: 0.5rem;
+	}
+	.flashcard-front .flashcard-tag {
+		color: var(--accent);
+	}
+	.flashcard-back .flashcard-tag {
+		color: var(--accent-alt-dark);
+	}
+	.flashcard-text {
+		flex: 1;
+		line-height: 1.5;
+		color: var(--foreground);
+	}
+	.flashcard-hint {
+		margin-top: 0.75rem;
+		font-size: 0.7rem;
+		color: var(--muted-foreground);
+		text-align: right;
+		opacity: 0.55;
+	}
+	@media (prefers-color-scheme: dark) {
+		.flashcard-back .flashcard-tag {
+			color: var(--accent-alt-light);
+		}
+		.flashcard-back {
+			background: oklch(from var(--accent-alt) l c h / 0.1);
+		}
+	}
+</style>
