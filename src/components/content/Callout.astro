@@ -1,0 +1,79 @@
+---
+interface Props {
+	type?: 'note' | 'tip' | 'warning' | 'key' | 'exercise'
+}
+const { type = 'note' } = Astro.props
+
+const icons: Record<string, string> = {
+	note: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+	tip: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
+	warning: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+	key: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+	exercise: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
+}
+---
+
+<aside class={`callout callout-${type}`}>
+	<span class="callout-icon" set:html={icons[type]} />
+	<div class="callout-content">
+		<slot />
+	</div>
+</aside>
+
+<style>
+	aside {
+		display: flex;
+		gap: 0.75rem;
+		margin: 1.5em 0;
+		padding: 0.85rem 1rem;
+		border-left: 3px solid;
+		border-radius: 0 var(--radius-md) var(--radius-md) 0;
+		font-size: 0.925em;
+		line-height: 1.6;
+	}
+	.callout-icon {
+		flex-shrink: 0;
+		margin-top: 0.15em;
+		opacity: 0.85;
+	}
+	.callout-content :global(p:last-child) {
+		margin-bottom: 0;
+	}
+	/* note */
+	.callout-note {
+		border-color: var(--muted-foreground);
+		background: oklch(from var(--muted-foreground) l c h / 0.06);
+		color: inherit;
+	}
+	.callout-note .callout-icon { color: var(--muted-foreground); }
+	/* tip */
+	.callout-tip {
+		border-color: var(--accent-alt);
+		background: oklch(from var(--accent-alt) l c h / 0.07);
+	}
+	.callout-tip .callout-icon { color: var(--accent-alt-dark); }
+	/* warning */
+	.callout-warning {
+		border-color: oklch(0.7 0.16 75);
+		background: oklch(0.7 0.16 75 / 0.07);
+	}
+	.callout-warning .callout-icon { color: oklch(0.62 0.16 75); }
+	/* key */
+	.callout-key {
+		border-color: var(--accent);
+		background: oklch(from var(--accent) l c h / 0.07);
+	}
+	.callout-key .callout-icon { color: var(--accent); }
+	/* exercise */
+	.callout-exercise {
+		border-color: oklch(0.65 0.14 145);
+		background: oklch(0.65 0.14 145 / 0.07);
+	}
+	.callout-exercise .callout-icon { color: oklch(0.55 0.14 145); }
+
+	@media (prefers-color-scheme: dark) {
+		.callout-tip .callout-icon { color: var(--accent-alt-light); }
+		.callout-warning .callout-icon { color: oklch(0.78 0.16 75); }
+		.callout-exercise .callout-icon { color: oklch(0.72 0.14 145); }
+	}
+</style>
