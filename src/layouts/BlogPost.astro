@@ -429,6 +429,27 @@ const base = import.meta.env.BASE_URL;
 </script>
 
 <script>
+	// Inject copy buttons into code blocks on each page load.
+	document.addEventListener('astro:page-load', () => {
+		document.querySelectorAll('.prose pre').forEach((pre) => {
+			if (pre.querySelector('.copy-btn')) return;
+			const btn = document.createElement('button');
+			btn.textContent = 'Copy';
+			btn.className = 'copy-btn';
+			btn.setAttribute('aria-label', 'Copy code');
+			btn.addEventListener('click', () => {
+				const code = pre.querySelector('code')?.textContent ?? '';
+				navigator.clipboard.writeText(code).then(() => {
+					btn.textContent = 'Copied!';
+					setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+				});
+			});
+			pre.appendChild(btn);
+		});
+	});
+</script>
+
+<script>
 	const base = import.meta.env.BASE_URL;
 
 	function toggleSidebar() {
