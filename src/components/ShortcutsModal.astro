@@ -16,10 +16,10 @@
 	</div>
 	<table>
 		<tbody>
-			<tr><td><kbd>→</kbd> / <kbd>]</kbd></td><td>Next post</td></tr>
-			<tr><td><kbd>←</kbd> / <kbd>[</kbd></td><td>Previous post</td></tr>
-			<tr><td><kbd>f</kbd> / <kbd>s</kbd></td><td>Toggle sidebar</td></tr>
-			<tr><td><kbd>+</kbd> / <kbd>-</kbd></td><td>Increase / decrease text size</td></tr>
+			<tr><td><kbd>→</kbd> <span class="sep">/</span> <kbd>]</kbd></td><td>Next post</td></tr>
+			<tr><td><kbd>←</kbd> <span class="sep">/</span> <kbd>[</kbd></td><td>Previous post</td></tr>
+			<tr><td><kbd>f</kbd> <span class="sep">/</span> <kbd>s</kbd></td><td>Toggle sidebar</td></tr>
+			<tr><td><kbd>+</kbd> <span class="sep">/</span> <kbd>-</kbd></td><td>Increase / decrease text size</td></tr>
 			<tr><td><kbd>/</kbd></td><td>Open search</td></tr>
 			<tr><td><kbd>?</kbd></td><td>Show shortcuts</td></tr>
 			<tr><td><kbd>r</kbd></td><td>Review flashcards</td></tr>
@@ -204,9 +204,15 @@
 		background: var(--muted);
 		border: 1px solid oklch(from var(--foreground) l c h / 15%);
 		border-radius: var(--radius-sm);
-		font-family: inherit;
+		font-family: ui-monospace, monospace;
 		font-size: 0.8rem;
 		line-height: 1.4;
+	}
+	#shortcuts-modal .sep {
+		font-size: 1.5rem;
+		line-height: 1;
+		vertical-align: bottom;
+		color: var(--muted-foreground);
 	}
 	@media (prefers-color-scheme: dark) {
 		#shortcuts-modal {
