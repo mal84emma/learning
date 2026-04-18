@@ -262,6 +262,9 @@ const currentPath = Astro.url.pathname;
 		opacity: 1;
 		border-left-color: var(--accent-alt-dark);
 	}
+	.nav-links :global(a.heading-link[data-visited]:not(.active-section)) {
+		opacity: 0.4;
+	}
 	.social-links {
 		display: flex;
 		flex-direction: row;
@@ -313,6 +316,9 @@ const currentPath = Astro.url.pathname;
 		.nav-links :global(a.heading-link.active-section) {
 			color: var(--accent-alt-light);
 			border-left-color: var(--accent-alt-light);
+		}
+		.nav-links :global(a.heading-link[data-visited]:not(.active-section)) {
+			opacity: 0.35;
 		}
 	}
 </style>
@@ -386,9 +392,19 @@ const currentPath = Astro.url.pathname;
 		document.dispatchEvent(new CustomEvent('open-shortcuts'));
 	});
 
-	// Highlight active section heading based on scroll position
-	const headingLinks = document.querySelectorAll<HTMLAnchorElement>('.heading-link');
-	if (headingLinks.length > 0) {
+	// Section tracking: re-initialise on every navigation so heading element references
+	// are always fresh. AbortController cleans up the scroll listener before each swap.
+	let sectionAbort = new AbortController();
+
+	document.addEventListener('astro:before-swap', () => {
+		sectionAbort.abort();
+		sectionAbort = new AbortController();
+	});
+
+	function initSectionTracking() {
+		const headingLinks = document.querySelectorAll<HTMLAnchorElement>('.heading-link');
+		if (headingLinks.length === 0) return;
+
 		const headingEls = Array.from(headingLinks).map((link) => {
 			const id = link.getAttribute('href')!.slice(1);
 			return document.getElementById(id);
@@ -427,9 +443,20 @@ const currentPath = Astro.url.pathname;
 			}
 
 			setActive(current ?? headingEls[0]);
+
+			// Mark sections whose headings have scrolled above the viewport as visited.
+			headingLinks.forEach((link) => {
+				const id = link.getAttribute('href')!.slice(1);
+				const el = document.getElementById(id);
+				if (el && el.getBoundingClientRect().top < 0) {
+					link.dataset.visited = 'true';
+				}
+			});
 		}
 
-		window.addEventListener('scroll', updateActiveHeading, { passive: true });
+		window.addEventListener('scroll', updateActiveHeading, { passive: true, signal: sectionAbort.signal });
 		updateActiveHeading();
 	}
+
+	document.addEventListener('astro:page-load', initSectionTracking);
 </script>
