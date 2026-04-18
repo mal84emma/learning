@@ -152,6 +152,13 @@ p {
 .prose p {
 	margin-bottom: 2em;
 }
+/* Footnote counter — resets per post, increments on each .footnote span */
+.prose {
+	counter-reset: footnote;
+}
+.prose .footnote {
+	counter-increment: footnote;
+}
 textarea {
 	width: 100%;
 	font-size: 16px;

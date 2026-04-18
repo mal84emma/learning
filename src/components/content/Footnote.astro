@@ -1,0 +1,59 @@
+---
+// No props — note text is passed via slot.
+// Numbering is handled entirely by CSS counter-increment on .footnote,
+// with counter-reset on .prose defined in global.css.
+---
+
+<span class="footnote">
+	<sup><button class="footnote-ref" type="button" aria-label="footnote"></button></sup>
+	<span class="footnote-card" role="tooltip"><slot /></span>
+</span>
+
+<style>
+	.footnote {
+		position: relative;
+		display: inline;
+	}
+	.footnote-ref {
+		background: none;
+		border: none;
+		padding: 0;
+		margin: 0;
+		font: inherit;
+		color: var(--accent);
+		cursor: help;
+		line-height: 1;
+	}
+	/* CSS counter provides the number — no JS needed */
+	.footnote-ref::before {
+		content: counter(footnote);
+	}
+	.footnote-card {
+		display: none;
+		position: absolute;
+		bottom: calc(100% + 0.5rem);
+		left: 0;
+		width: max-content;
+		max-width: 40ch;
+		padding: 0.5rem 0.75rem;
+		background: var(--card);
+		border: 1px solid oklch(from var(--foreground) l c h / 12%);
+		border-radius: var(--radius-md);
+		box-shadow: 0 4px 16px oklch(0 0 0 / 12%);
+		font-size: 0.85rem;
+		line-height: 1.5;
+		color: var(--foreground);
+		z-index: 50;
+		pointer-events: none;
+	}
+	/* Show on hover or when the button is focused (touch tap) */
+	.footnote:hover .footnote-card,
+	.footnote:focus-within .footnote-card {
+		display: block;
+	}
+	@media (prefers-color-scheme: dark) {
+		.footnote-card {
+			box-shadow: 0 4px 16px oklch(0 0 0 / 40%);
+		}
+	}
+</style>
