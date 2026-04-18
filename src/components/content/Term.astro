@@ -23,7 +23,9 @@ const { def } = Astro.props
 		font: inherit;
 		color: inherit;
 		cursor: help;
-		border-bottom: 1px dashed var(--muted-foreground);
+		text-decoration: underline dashed var(--muted-foreground);
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.25rem;
 	}
 	.term-card {
 		display: none;

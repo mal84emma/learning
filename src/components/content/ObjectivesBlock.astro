@@ -1,28 +1,28 @@
 ---
+import Callout from './Callout.astro'
+
 interface Props {
 	objectives: string[]
 }
 const { objectives } = Astro.props
 ---
 
-<div class="objectives">
-	<span class="objectives-label">After this post</span>
-	<ul>
-		{objectives.map((obj) => <li>{obj}</li>)}
-	</ul>
+<div class="objectives-wrap">
+	<Callout type="tip">
+		<span class="objectives-label">After this post</span>
+		<ul>
+			{objectives.map((obj) => <li>{obj}</li>)}
+		</ul>
+	</Callout>
 </div>
 
 <style>
-	.objectives {
-		margin: 1.5em 0;
-		padding: 0.85rem 1rem;
-		border-left: 3px solid var(--accent-alt);
-		border-radius: 0 var(--radius-md) var(--radius-md) 0;
-		background: oklch(from var(--accent-alt) l c h / 0.07);
+	.objectives-wrap :global(.callout-icon) {
+		display: none;
 	}
 	.objectives-label {
 		display: block;
-		font-size: 0.75rem;
+		font-size: 0.925rem;
 		font-weight: 600;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
