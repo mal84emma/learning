@@ -7,24 +7,26 @@ import AstroSearch from "astro-pagefind/components/Search";
 </dialog>
 
 <script>
-	const modal = document.getElementById('search-modal') as HTMLDialogElement;
-
-	function openSearch() {
-		modal.showModal();
-		requestAnimationFrame(() => {
-			modal.querySelector<HTMLInputElement>('input')?.focus();
-		});
+	function getModal() {
+		return document.getElementById('search-modal') as HTMLDialogElement | null;
 	}
 
-	document.addEventListener('open-search', openSearch);
+	document.addEventListener('open-search', () => {
+		const modal = getModal();
+		if (!modal) return;
+		modal.showModal();
+		requestAnimationFrame(() => modal.querySelector<HTMLInputElement>('input')?.focus());
+	});
 
-	modal.addEventListener('click', (e) => {
-		if (e.target === modal) modal.close();
+	// Click backdrop to close — use document delegation so the listener is never stale.
+	document.addEventListener('click', (e) => {
+		const modal = getModal();
+		if (modal?.open && e.target === modal) modal.close();
 	});
 
 	// Close whenever a View Transitions navigation completes.
 	document.addEventListener('astro:page-load', () => {
-		if (modal.open) modal.close();
+		getModal()?.close();
 	});
 </script>
 

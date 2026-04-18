@@ -27,9 +27,11 @@
 </dialog>
 
 <script>
-	const modal = document.getElementById('shortcuts-modal') as HTMLDialogElement;
-	const scaleButtons = document.querySelectorAll<HTMLButtonElement>('#shortcuts-modal .scale-btn');
 	const fontSizes = ['font-xs', 'font-sm', '', 'font-lg', 'font-xl'];
+
+	function getModal() {
+		return document.getElementById('shortcuts-modal') as HTMLDialogElement | null;
+	}
 
 	function getCurrentSize(): string {
 		for (const s of fontSizes) {
@@ -40,7 +42,7 @@
 
 	function updateActiveButton() {
 		const current = getCurrentSize();
-		scaleButtons.forEach((btn) => {
+		document.querySelectorAll<HTMLButtonElement>('#shortcuts-modal .scale-btn').forEach((btn) => {
 			btn.classList.toggle('active', btn.dataset.size === current);
 		});
 	}
@@ -54,21 +56,36 @@
 		updateActiveButton();
 	}
 
-	scaleButtons.forEach((btn) => {
-		btn.addEventListener('click', () => applySize(btn.dataset.size ?? ''));
+	// Re-wire font size buttons on every navigation — they're new DOM nodes after each swap.
+	let shortcutsAbort = new AbortController();
+
+	document.addEventListener('astro:before-swap', () => {
+		shortcutsAbort.abort();
+		shortcutsAbort = new AbortController();
 	});
 
+	document.addEventListener('astro:page-load', () => {
+		const { signal } = shortcutsAbort;
+		document.querySelectorAll<HTMLButtonElement>('#shortcuts-modal .scale-btn').forEach((btn) => {
+			btn.addEventListener('click', () => applySize(btn.dataset.size ?? ''), { signal });
+		});
+	});
+
+	// open, keydown, and click-to-close all use dynamic lookups so they're never stale.
 	document.addEventListener('open-shortcuts', () => {
+		const modal = getModal();
+		if (!modal) return;
 		modal.showModal();
 		updateActiveButton();
 	});
 
 	document.addEventListener('keydown', (e) => {
-		if (e.key === '?' && modal.open) modal.close();
+		if (e.key === '?' && getModal()?.open) getModal()?.close();
 	});
 
-	modal.addEventListener('click', (e) => {
-		if (e.target === modal) modal.close();
+	document.addEventListener('click', (e) => {
+		const modal = getModal();
+		if (modal?.open && e.target === modal) modal.close();
 	});
 </script>
 

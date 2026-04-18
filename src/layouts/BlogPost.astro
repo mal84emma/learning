@@ -275,8 +275,8 @@ const base = import.meta.env.BASE_URL;
 	<body>
 		<PageScrollbar />
 		<Sidebar headings={headings} />
-		<Search transition:persist="search" />
-		<ShortcutsModal transition:persist="shortcuts" />
+		<Search />
+		<ShortcutsModal />
 		<div id="continue-banner" role="status" aria-live="polite">
 			<button id="continue-jump" aria-label="Jump back to saved position">Jump back in ↓</button>
 			<button id="continue-dismiss" aria-label="Dismiss">✕</button>
