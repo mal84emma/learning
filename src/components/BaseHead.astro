@@ -77,3 +77,19 @@ const { title, description, image = FallbackImage } = Astro.props;
 <meta property="twitter:image" content={new URL(image.src, Astro.url)} />
 
 <ClientRouter />
+
+<script is:inline>
+	document.addEventListener('astro:before-swap', (e) => {
+		window._navLock = true;
+
+		const size = localStorage.getItem('learning-font-size');
+		if (size) e.newDocument.documentElement.classList.add(size);
+
+		const sidebarSaved = localStorage.getItem('sidebar-collapsed');
+		const shouldCollapse = sidebarSaved === 'true' || (sidebarSaved === null && window.innerWidth < 1000);
+		if (shouldCollapse) {
+			e.newDocument.getElementById('sidebar')?.classList.add('collapsed');
+			e.newDocument.body.classList.add('sidebar-collapsed');
+		}
+	});
+</script>

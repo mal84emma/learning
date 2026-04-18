@@ -375,10 +375,23 @@ const base = import.meta.env.BASE_URL;
 </script>
 
 <script>
-	// Scroll position save: read pathname on every scroll event so the correct key is used
-	// after View Transitions navigations.
+	// Scroll position save. During View Transitions, Astro calls scrollTo(0,0) after updating
+	// the URL, which would overwrite the new page's saved position with 0. We suppress saving
+	// during the transition and explicitly snapshot the outgoing page in astro:before-swap.
+	// window._navLock is set in BaseHead.astro's before-swap handler (which runs for all pages,
+	// including the first blog navigation from a non-blog page) so it's always true in time.
+	document.addEventListener('astro:before-swap', () => {
+		localStorage.setItem(`learning-scroll-${window.location.pathname}`, String(window.scrollY));
+	});
+	document.addEventListener('astro:page-load', () => {
+		// Double-RAF keeps _navLock true past the navigation scroll-to-0 (which fires in
+		// the first RAF after page-load), preventing it from overwriting the saved position.
+		requestAnimationFrame(() => { requestAnimationFrame(() => { window._navLock = false; }); });
+	});
+
 	let rafPending = false;
 	window.addEventListener('scroll', () => {
+		if (window._navLock) return;
 		if (!rafPending) {
 			rafPending = true;
 			requestAnimationFrame(() => {
@@ -407,7 +420,7 @@ const base = import.meta.env.BASE_URL;
 		const dismissKey = `learning-scroll-dismissed-${window.location.pathname}`;
 		const { signal } = bannerAbort;
 
-		function hideBanner() { banner.classList.remove('visible'); }
+		function hideBanner() { banner?.classList.remove('visible'); }
 
 		dismissBtn.addEventListener('click', () => {
 			sessionStorage.setItem(dismissKey, 'true');
@@ -419,14 +432,19 @@ const base = import.meta.env.BASE_URL;
 			hideBanner();
 		}, { signal });
 
-		window.addEventListener('scroll', hideBanner, { passive: true, once: true, signal });
-
-		const saved = Number(localStorage.getItem(storageKey));
-		if (saved > document.body.scrollHeight * 0.15 && !sessionStorage.getItem(dismissKey)) {
-			banner.classList.add('visible');
-		} else {
-			banner.classList.remove('visible');
-		}
+		// Defer to the next frame so any navigation scroll-to-0 (queued as a RAF by Astro)
+		// fires first — without a hideBanner listener in place — and scrollHeight is
+		// computed after layout settles.
+		requestAnimationFrame(() => {
+			if (signal.aborted) return;
+			window.addEventListener('scroll', hideBanner, { passive: true, once: true, signal });
+			const saved = Number(localStorage.getItem(storageKey));
+			if (saved > document.body.scrollHeight * 0.15 && !sessionStorage.getItem(dismissKey)) {
+				banner.classList.add('visible');
+			} else {
+				banner.classList.remove('visible');
+			}
+		});
 	});
 </script>
 
@@ -452,6 +470,8 @@ const base = import.meta.env.BASE_URL;
 </script>
 
 <script>
+	import { navigate } from 'astro:transitions/client';
+
 	const base = import.meta.env.BASE_URL;
 
 	function toggleSidebar() {
@@ -475,11 +495,13 @@ const base = import.meta.env.BASE_URL;
 		const prevSlug = navData?.dataset.prevSlug;
 		const nextSlug = navData?.dataset.nextSlug;
 		if ((e.key === 'ArrowRight' || e.key === ']') && nextSlug)
-			location.href = `${base}/blog/${nextSlug}`;
+			navigate(`${base}/blog/${nextSlug}`);
 		if ((e.key === 'ArrowLeft' || e.key === '[') && prevSlug)
-			location.href = `${base}/blog/${prevSlug}`;
+			navigate(`${base}/blog/${prevSlug}`);
 		if (e.key === 'f' || e.key === 's') toggleSidebar();
 		if (e.key === '/') { e.preventDefault(); openSearch(); }
 		if (e.key === '?') { e.preventDefault(); openShortcuts(); }
+		if (e.key === '+' || e.key === '=') { e.preventDefault(); document.dispatchEvent(new CustomEvent('font-size-step', { detail: { delta: 1 } })); }
+		if (e.key === '-' || e.key === '_') { e.preventDefault(); document.dispatchEvent(new CustomEvent('font-size-step', { detail: { delta: -1 } })); }
 	});
 </script>
