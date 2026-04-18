@@ -39,7 +39,7 @@ const { def } = Astro.props
 		border: 1px solid oklch(from var(--foreground) l c h / 12%);
 		border-radius: var(--radius-md);
 		box-shadow: 0 4px 16px oklch(0 0 0 / 12%);
-		font-size: 0.85rem;
+		font-size: calc(var(--prose-font-size) * 0.85);
 		line-height: 1.5;
 		color: var(--foreground);
 		z-index: 50;

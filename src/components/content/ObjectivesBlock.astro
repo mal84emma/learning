@@ -22,7 +22,7 @@ const { objectives } = Astro.props
 	}
 	.objectives-label {
 		display: block;
-		font-size: 0.925rem;
+		font-size: calc(var(--prose-font-size) * 0.85);
 		font-weight: 600;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
@@ -32,7 +32,7 @@ const { objectives } = Astro.props
 	ul {
 		margin: 0;
 		padding-left: 1.25rem;
-		font-size: 0.925em;
+		font-size: calc(var(--prose-font-size) * 0.85);
 		line-height: 1.6;
 	}
 	li {

@@ -310,7 +310,7 @@ const { cards } = Astro.props;
 		margin-bottom: 0.25rem;
 	}
 	.fc-face-tag {
-		font-size: 0.8rem;
+		font-size: calc(var(--prose-font-size) * 0.7);
 		font-weight:600;
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
@@ -318,13 +318,13 @@ const { cards } = Astro.props;
 	.fc-card-front .fc-face-tag { color: var(--accent); }
 	.fc-card-back .fc-face-tag { color: var(--accent-alt-dark); }
 	.fc-post-title {
-		font-size: 0.65rem;
+		font-size: calc(var(--prose-font-size) * 0.65);
 		color: var(--muted-foreground);
 		opacity: 0.7;
 	}
 	.fc-face-text {
 		flex: 1;
-		font-size: 1.05rem;
+		font-size: var(--prose-font-size);
 		line-height: 1.5;
 		color: var(--foreground);
 	}
