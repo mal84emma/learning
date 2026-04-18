@@ -1,0 +1,56 @@
+---
+interface Props {
+	def: string
+}
+const { def } = Astro.props
+---
+
+<span class="term">
+	<button class="term-trigger" type="button"><slot /></button>
+	<span class="term-card" role="tooltip">{def}</span>
+</span>
+
+<style>
+	.term {
+		position: relative;
+		display: inline;
+	}
+	.term-trigger {
+		background: none;
+		border: none;
+		padding: 0;
+		margin: 0;
+		font: inherit;
+		color: inherit;
+		cursor: help;
+		border-bottom: 1px dashed var(--muted-foreground);
+	}
+	.term-card {
+		display: none;
+		position: absolute;
+		bottom: calc(100% + 0.5rem);
+		left: 0;
+		width: max-content;
+		max-width: 36ch;
+		padding: 0.5rem 0.75rem;
+		background: var(--card);
+		border: 1px solid oklch(from var(--foreground) l c h / 12%);
+		border-radius: var(--radius-md);
+		box-shadow: 0 4px 16px oklch(0 0 0 / 12%);
+		font-size: 0.85rem;
+		line-height: 1.5;
+		color: var(--foreground);
+		z-index: 50;
+		pointer-events: none;
+	}
+	/* Show on hover or when the button is focused (touch tap) */
+	.term:hover .term-card,
+	.term:focus-within .term-card {
+		display: block;
+	}
+	@media (prefers-color-scheme: dark) {
+		.term-card {
+			box-shadow: 0 4px 16px oklch(0 0 0 / 40%);
+		}
+	}
+</style>

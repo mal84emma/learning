@@ -2,6 +2,7 @@
 import { type CollectionEntry, getCollection, render } from 'astro:content';
 import BlogPost from '../../layouts/BlogPost.astro';
 import Callout from '../../components/content/Callout.astro';
+import Term from '../../components/content/Term.astro';
 
 export async function getStaticPaths() {
 	const allPosts = await getCollection('blog');
@@ -45,5 +46,5 @@ const readingTime: string | undefined = remarkPluginFrontmatter?.readingTime;
 	prevPost={prevPost ? { slug: prevPost.id, shortTitle: prevPost.data.shortTitle } : undefined}
 	nextPost={nextPost ? { slug: nextPost.id, shortTitle: nextPost.data.shortTitle } : undefined}
 >
-	<Content components={{ Callout }} />
+	<Content components={{ Callout, Term }} />
 </BlogPost>
