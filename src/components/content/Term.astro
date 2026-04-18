@@ -10,6 +10,11 @@ const { def } = Astro.props
 	<span class="term-card" role="tooltip">{def}</span>
 </span>
 
+<script>
+	import { initPopups } from '@/lib/initPopup';
+	document.addEventListener('astro:page-load', () => initPopups('.term', '.term-card'));
+</script>
+
 <style>
 	.term {
 		position: relative;
@@ -45,12 +50,7 @@ const { def } = Astro.props
 		z-index: 50;
 		pointer-events: none;
 	}
-	/* Show on hover or when the button is focused (touch tap) */
-	.term:hover .term-card,
-	.term:focus-within .term-card {
-		display: block;
-	}
-	@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
 		.term-card {
 			box-shadow: 0 4px 16px oklch(0 0 0 / 40%);
 		}

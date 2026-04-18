@@ -9,6 +9,11 @@
 	<span class="footnote-card" role="tooltip"><slot /></span>
 </span>
 
+<script>
+	import { initPopups } from '@/lib/initPopup';
+	document.addEventListener('astro:page-load', () => initPopups('.footnote', '.footnote-card'));
+</script>
+
 <style>
 	.footnote {
 		position: relative;
@@ -45,11 +50,6 @@
 		color: var(--foreground);
 		z-index: 50;
 		pointer-events: none;
-	}
-	/* Show on hover or when the button is focused (touch tap) */
-	.footnote:hover .footnote-card,
-	.footnote:focus-within .footnote-card {
-		display: block;
 	}
 	@media (prefers-color-scheme: dark) {
 		.footnote-card {
