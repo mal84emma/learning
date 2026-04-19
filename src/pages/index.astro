@@ -111,14 +111,14 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 	}
 
 
-	const jitterInterval = 10000;
+	const jitterInterval = 15000;
 	function render(t: number) {
 		if (!imageData) return;
 		const data = imageData.data;
 		const INV = 1 / SCALE;
 		const N = waves.length;
 
-		const alpha = Math.min(1, (t - jitterStart) / (jitterInterval / 10));
+		const alpha = Math.min(1, (t - jitterStart) / (jitterInterval / 3));
 		const kx: number[] = [], ky: number[] = [], phase: number[] = [], amp: number[] = [];
 		for (let i = 0; i < N; i++) {
 			const w = waves[i];
@@ -152,7 +152,7 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 
 	function jitterWaves() {
 		const now = performance.now();
-		const alpha = Math.min(1, (now - jitterStart) / (jitterInterval / 10));
+		const alpha = Math.min(1, (now - jitterStart) / (jitterInterval / 3));
 		const j = () => 1 + (Math.random() * 0.1 - 0.05);
 		for (let i = 0; i < waves.length; i++) {
 			const from = trFrom[i], to = trTo[i];
