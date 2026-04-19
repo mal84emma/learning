@@ -10,7 +10,8 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 	</head>
-	<body>
+	<body class="index-page">
+		<canvas id="shimmer-canvas"></canvas>
 		<Header />
 		<main>
 			<h1>Why Learn?</h1>
@@ -25,3 +26,161 @@ import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 		<Footer />
 	</body>
 </html>
+
+<style>
+	body.index-page {
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		position: relative;
+	}
+	body.index-page main {
+		flex: 1;
+	}
+	#shimmer-canvas {
+		position: fixed;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+		z-index: -1;
+		mix-blend-mode: soft-light;
+	}
+</style>
+
+<script>
+	const canvas = document.getElementById('shimmer-canvas') as HTMLCanvasElement;
+	const ctx = canvas.getContext('2d')!;
+
+	const SCALE = 1;
+	const TAU = Math.PI * 2;
+	const MAX_DRIFT = Math.PI / 2;
+
+	interface Wave {
+		baseAngle: number;
+		driftAmp: number;
+		driftSpeed: number;
+		driftPhase: number;
+		wavelength: number;
+		speed: number;
+		amplitude: number;
+		startPhase: number;
+	}
+
+	function makeWave(baseAngle: number): Wave {
+		const ref = (window.innerWidth + window.innerHeight) / 2;
+		return {
+			baseAngle,
+			driftAmp:   MAX_DRIFT * (0.1 + Math.random() * 0.1),
+			driftSpeed: 0.00025 + Math.random() * 0.0005,
+			driftPhase: Math.PI * 0.5 * Math.random(),
+			wavelength: ref * (1 + Math.random() * 0.25),
+			speed:      0.0002 + Math.random() * 0.00025,
+			amplitude:  30 + Math.random() * 10,
+			startPhase: Math.PI * 0.5 * Math.random(),
+		};
+	}
+
+	const waves: Wave[] = [
+		makeWave(0), makeWave(Math.PI / 2),
+	];
+
+	interface LiveProps { driftAmp: number; driftSpeed: number; wavelength: number; speed: number; amplitude: number; }
+	const trFrom: LiveProps[] = waves.map(w => ({ driftAmp: w.driftAmp, driftSpeed: w.driftSpeed, wavelength: w.wavelength, speed: w.speed, amplitude: w.amplitude }));
+	const trTo:   LiveProps[] = trFrom.map(lp => ({ ...lp }));
+	let jitterStart = -Infinity;
+
+	function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
+
+	let W = 0, H = 0;
+	let imageData: ImageData | null = null;
+	const rowTerms = [0, 0, 0, 0];
+
+	function resize() {
+		W = Math.ceil(window.innerWidth * SCALE);
+		H = Math.ceil(window.innerHeight * SCALE);
+		canvas.width = W;
+		canvas.height = H;
+		imageData = ctx.createImageData(W, H);
+		const d = imageData.data;
+		for (let i = 0; i < d.length; i += 4) {
+			d[i] = d[i + 1] = d[i + 2] = 128;
+			d[i + 3] = 255;
+		}
+		ctx.putImageData(imageData, 0, 0);
+	}
+
+
+	const jitterInterval = 10000;
+	function render(t: number) {
+		if (!imageData) return;
+		const data = imageData.data;
+		const INV = 1 / SCALE;
+		const N = waves.length;
+
+		const alpha = Math.min(1, (t - jitterStart) / (jitterInterval / 10));
+		const kx: number[] = [], ky: number[] = [], phase: number[] = [], amp: number[] = [];
+		for (let i = 0; i < N; i++) {
+			const w = waves[i];
+			const driftAmp   = lerp(trFrom[i].driftAmp,   trTo[i].driftAmp,   alpha);
+			const driftSpeed = lerp(trFrom[i].driftSpeed, trTo[i].driftSpeed, alpha);
+			const wavelength = lerp(trFrom[i].wavelength, trTo[i].wavelength, alpha);
+			const speed      = lerp(trFrom[i].speed,      trTo[i].speed,      alpha);
+			const angle = w.baseAngle + driftAmp * Math.sin(t * driftSpeed + w.driftPhase);
+			kx.push(TAU * Math.cos(angle) / wavelength);
+			ky.push(TAU * Math.sin(angle) / wavelength);
+			phase.push(w.startPhase + t * speed);
+			amp.push(lerp(trFrom[i].amplitude, trTo[i].amplitude, alpha));
+		}
+
+		for (let cy = 0; cy < H; cy++) {
+			const vy = cy * INV;
+			for (let wi = 0; wi < N; wi++) rowTerms[wi] = ky[wi] * vy + phase[wi];
+
+			for (let cx = 0; cx < W; cx++) {
+				const vx = cx * INV;
+				let sum = 0;
+				for (let wi = 0; wi < N; wi++) sum += amp[wi] * Math.sin(kx[wi] * vx + rowTerms[wi]);
+				const val = (128 + sum) | 0;
+				const idx = (cy * W + cx) << 2;
+				data[idx] = data[idx + 1] = data[idx + 2] = val;
+			}
+		}
+
+		ctx.putImageData(imageData, 0, 0);
+	}
+
+	function jitterWaves() {
+		const now = performance.now();
+		const alpha = Math.min(1, (now - jitterStart) / (jitterInterval / 10));
+		const j = () => 1 + (Math.random() * 0.1 - 0.05);
+		for (let i = 0; i < waves.length; i++) {
+			const from = trFrom[i], to = trTo[i];
+			from.driftAmp   = lerp(from.driftAmp,   to.driftAmp,   alpha);
+			from.driftSpeed = lerp(from.driftSpeed, to.driftSpeed, alpha);
+			from.wavelength = lerp(from.wavelength, to.wavelength, alpha);
+			from.speed      = lerp(from.speed,      to.speed,      alpha);
+			from.amplitude  = lerp(from.amplitude,  to.amplitude,  alpha);
+			to.driftAmp   *= j();
+			to.driftSpeed *= j();
+			to.wavelength *= j();
+			to.speed      *= j();
+			to.amplitude  *= j();
+		}
+		jitterStart = now;
+	}
+
+	setInterval(jitterWaves, jitterInterval);
+
+	let lastFrame = 0;
+	function animate(t: number) {
+		requestAnimationFrame(animate);
+		if (t - lastFrame < 33) return;
+		lastFrame = t;
+		render(t);
+	}
+
+	window.addEventListener('resize', resize);
+	resize();
+	requestAnimationFrame(animate);
+</script>
