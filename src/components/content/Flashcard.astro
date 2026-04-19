@@ -32,11 +32,26 @@ const { front, back } = Astro.props
 <script>
 	document.addEventListener('astro:page-load', () => {
 		document.querySelectorAll<HTMLElement>('.flashcard').forEach((card) => {
-			card.addEventListener('click', () => card.classList.toggle('is-flipped'))
+			const inner = card.querySelector<HTMLElement>('.flashcard-inner')
+			if (!inner) return
+			let flipped = false
+			function flip() {
+				if (inner?.classList.contains('is-unflipping')) return
+				if (flipped) {
+					flipped = false
+					inner?.classList.remove('is-flipped')
+					inner?.classList.add('is-unflipping')
+					setTimeout(() => inner?.classList.remove('is-unflipping'), 400)
+				} else {
+					flipped = true
+					inner?.classList.add('is-flipped')
+				}
+			}
+			card.addEventListener('click', flip)
 			card.addEventListener('keydown', (e) => {
 				if (e.key === 'Enter') {
 					e.preventDefault()
-					card.classList.toggle('is-flipped')
+					flip()
 				}
 			})
 		})
@@ -59,11 +74,6 @@ const { front, back } = Astro.props
 	.flashcard-inner {
 		display: grid;
 		min-height: 7rem;
-		transform-style: preserve-3d;
-		transition: transform 0.4s ease;
-	}
-	.flashcard.is-flipped .flashcard-inner {
-		transform: rotateX(180deg);
 	}
 	.flashcard-face {
 		grid-area: 1 / 1;
@@ -73,16 +83,82 @@ const { front, back } = Astro.props
 		padding: 1.25rem 1.5rem;
 		border: 1px solid oklch(from var(--foreground) l c h / 12%);
 		border-radius: var(--radius-2xl);
-		backface-visibility: hidden;
-		-webkit-backface-visibility: hidden;
 	}
 	.flashcard-front {
 		background: var(--card);
 	}
 	.flashcard-back {
-		transform: rotateX(180deg);
+		visibility: hidden;
 		background: oklch(from var(--accent-alt) l c h / 0.06);
 		border-color: oklch(from var(--accent-alt) l c h / 0.25);
+	}
+	@keyframes flashcard-flip-out {
+		from { transform: rotateX(0deg); }
+		to   { transform: rotateX(-90deg); }
+	}
+	@keyframes flashcard-flip-in {
+		from { transform: rotateX(90deg); }
+		to   { transform: rotateX(0deg); }
+	}
+	@keyframes flashcard-flip-reverse-out {
+		from { transform: rotateX(0deg); }
+		to   { transform: rotateX(90deg); }
+	}
+	@keyframes flashcard-flip-reverse-in {
+		from { transform: rotateX(-90deg); }
+		to   { transform: rotateX(0deg); }
+	}
+	.flashcard-inner.is-flipped .flashcard-front {
+		animation: flashcard-flip-out 0.2s ease forwards;
+		visibility: hidden;
+		transition: visibility 0s 0.2s, opacity 0.2s ease;
+	}
+	.flashcard-inner.is-flipped .flashcard-back {
+		visibility: visible;
+		animation: flashcard-flip-in 0.2s ease 0.2s both;
+	}
+	.flashcard-inner.is-unflipping .flashcard-back {
+		animation: flashcard-flip-reverse-out 0.2s ease forwards;
+		visibility: hidden;
+		transition: visibility 0s 0.2s;
+	}
+	.flashcard-inner.is-unflipping .flashcard-front {
+		visibility: visible;
+		animation: flashcard-flip-reverse-in 0.2s ease 0.2s both;
+	}
+	.flashcard-front .flashcard-tag,
+	.flashcard-front .flashcard-text,
+	.flashcard-front .flashcard-hint,
+	.flashcard-front {
+		transition: opacity 0.2s ease;
+	}
+	.flashcard-inner.is-flipped .flashcard-front .flashcard-tag,
+	.flashcard-inner.is-flipped .flashcard-front .flashcard-text,
+	.flashcard-inner.is-flipped .flashcard-front,
+	.flashcard-inner.is-flipped .flashcard-front {
+		opacity: 0;
+	}
+	.flashcard-inner.is-unflipping .flashcard-front .flashcard-tag,
+	.flashcard-inner.is-unflipping .flashcard-front .flashcard-text,
+	.flashcard-inner.is-unflipping .flashcard-front,
+	.flashcard-inner.is-unflipping .flashcard-front {
+		opacity: 1;
+		transition: opacity 0.2s ease 0.2s;
+	}
+	.flashcard-back .flashcard-tag,
+	.flashcard-back .flashcard-text {
+		opacity: 0;
+		transition: opacity 0.2s ease;
+	}
+	.flashcard-inner.is-flipped .flashcard-back .flashcard-tag,
+	.flashcard-inner.is-flipped .flashcard-back .flashcard-text {
+		opacity: 1;
+		transition: opacity 0.2s ease 0.2s;
+	}
+	.flashcard-inner.is-unflipping .flashcard-back .flashcard-tag,
+	.flashcard-inner.is-unflipping .flashcard-back .flashcard-text {
+		opacity: 0;
+		transition: opacity 0.2s ease;
 	}
 	.flashcard-tag {
 		font-size: calc(var(--prose-font-size) * 0.7);

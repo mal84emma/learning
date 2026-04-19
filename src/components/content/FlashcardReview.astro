@@ -140,11 +140,6 @@ const { cards } = Astro.props;
 			}, 400);
 		}
 
-		function advance() {
-			queuePos++;
-			if (queuePos >= queue.length) showSummary();
-			else showCard(queuePos);
-		}
 
 		function showSummary() {
 			if (cardEl)     cardEl.hidden              = true;
@@ -192,7 +187,45 @@ const { cards } = Astro.props;
 		gotItBtn?.addEventListener('click', () => {
 			mastered.add(queue[queuePos].id);
 			saveMastered(mastered);
-			advance();
+			isFlipped = false;
+			cardInner?.classList.remove('is-flipped');
+			actionsEl?.classList.remove('is-visible');
+
+			if (!cardEl) {
+				queuePos++;
+				if (queuePos >= queue.length) showSummary();
+				else showCard(queuePos);
+				return;
+			}
+
+			const h0 = cardEl.offsetHeight;
+			cardEl.style.opacity = '0';
+			cardEl.style.transition = 'opacity 0.12s ease';
+
+			setTimeout(() => {
+				queuePos++;
+				if (queuePos >= queue.length) {
+					cardEl.style.opacity = '';
+					cardEl.style.transition = '';
+					showSummary();
+					return;
+				}
+				showCard(queuePos);
+
+				const h1 = cardEl.offsetHeight;
+				if (h1 !== h0) cardEl.style.height = `${h0}px`;
+
+				requestAnimationFrame(() => {
+					cardEl.style.transition = `opacity 0.15s ease${h1 !== h0 ? ', height 0.25s ease' : ''}`;
+					cardEl.style.opacity = '1';
+					if (h1 !== h0) cardEl.style.height = `${h1}px`;
+					setTimeout(() => {
+						cardEl.style.opacity = '';
+						cardEl.style.transition = '';
+						cardEl.style.height = '';
+					}, 250);
+				});
+			}, 120);
 		}, { signal });
 
 		restartBtn?.addEventListener('click', openReview, { signal });
@@ -245,6 +278,7 @@ const { cards } = Astro.props;
 		flex-direction: column;
 		gap: 0.75rem;
 		padding: 1rem 1.25rem;
+		transition: 0.2s ease;
 	}
 	.fc-header {
 		display: flex;
@@ -323,7 +357,7 @@ const { cards } = Astro.props;
 	.fc-card-inner.is-flipped .fc-card-front {
 		animation: fc-flip-out 0.2s ease forwards;
 		visibility: hidden;
-		transition: visibility 0s 0.2s;
+		transition: visibility 0s 0.2s, opacity 0.2s ease;
 	}
 	.fc-card-inner.is-flipped .fc-card-back {
 		visibility: visible;
@@ -350,7 +384,7 @@ const { cards } = Astro.props;
 	}
 	.fc-card-inner.is-unflipping .fc-card-front .fc-face-header,
 	.fc-card-inner.is-unflipping .fc-card-front .fc-face-text,
-	.fc-card-inner.is-unflipping .fc-card-front {
+	.fc-card-inner.is-unflipping .fc-card-front .fc-actions {
 		opacity: 1;
 		transition: opacity 0.2s ease 0.2s;
 	}
@@ -430,7 +464,7 @@ const { cards } = Astro.props;
 		font-size: 0.875rem;
 		font-weight: 500;
 		cursor: pointer;
-		transition: background 0.15s, color 0.15s;
+		transition: background 0.2s, color 0.2s, opacity 0.2s;
 	}
 	.fc-btn-again {
 		background: color-mix(in oklch, var(--input) 30%, transparent);
