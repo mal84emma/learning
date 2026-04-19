@@ -33,11 +33,20 @@ const allCards = posts
 
 <aside id="sidebar" data-pagefind-ignore>
 	<script is:inline>
-		// Apply collapsed state synchronously before first paint to avoid flash
+		// Apply collapsed state synchronously before first paint to avoid flash.
+		// Transitions must be suppressed here — CSS is already parsed when this runs,
+		// so adding 'collapsed' without suppression triggers the 1s transform animation.
+		const sidebar = document.getElementById('sidebar');
 		const savedState = localStorage.getItem('sidebar-collapsed');
 		if (savedState === 'true' || (savedState === null && window.innerWidth < 1000)) {
-			document.getElementById('sidebar').classList.add('collapsed');
+			sidebar.style.transition = 'none';
+			document.body.style.transition = 'none';
+			sidebar.classList.add('collapsed');
 			document.body.classList.add('sidebar-collapsed');
+			requestAnimationFrame(() => requestAnimationFrame(() => {
+				sidebar.style.transition = '';
+				document.body.style.transition = '';
+			}));
 		}
 		const savedFontSize = localStorage.getItem('learning-font-size');
 		if (savedFontSize) document.documentElement.classList.add(savedFontSize);

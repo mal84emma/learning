@@ -65,8 +65,17 @@ const { cards } = Astro.props;
 
 	let reviewAbort = new AbortController();
 
+	// Close before startViewTransition captures the outgoing screenshot.
+	// astro:before-swap fires inside that callback — too late to prevent the flash.
+	document.addEventListener('astro:before-preparation', () => {
+		const dialog = document.getElementById('fc-review-dialog') as HTMLDialogElement | null;
+		if (dialog?.open) {
+			dialog.close();
+			document.body.style.overflow = '';
+		}
+	});
+
 	document.addEventListener('astro:before-swap', () => {
-		document.body.style.overflow = '';
 		reviewAbort.abort();
 		reviewAbort = new AbortController();
 	});
@@ -160,9 +169,6 @@ const { cards } = Astro.props;
 			reviewDialog!.showModal();
 			document.body.style.overflow = 'hidden';
 			showCard(0);
-			requestAnimationFrame(() => {
-				reviewDialog!.style.marginTop = reviewDialog!.getBoundingClientRect().top + 'px';
-			});
 		}
 
 		function closeReview() {
@@ -233,10 +239,10 @@ const { cards } = Astro.props;
 
 		reviewDialog.addEventListener('close', () => {
 			document.body.style.overflow = '';
-			reviewDialog.style.marginTop = '';
 		}, { signal });
 
 		document.addEventListener('keydown', (e) => {
+			if (e.metaKey || e.ctrlKey || e.altKey) return;
 			const active = document.activeElement as HTMLElement | null;
 			if (reviewDialog.open) {
 				if (e.key === 'Enter' && active?.tagName !== 'BUTTON') {
@@ -258,6 +264,9 @@ const { cards } = Astro.props;
 </script>
 
 <style>
+	:global(.fc-review-dialog:not([open])) {
+		display: none;
+	}
 	:global(.fc-review-dialog) {
 		margin: auto;
 		width: min(620px, calc(100vw - 2rem));
