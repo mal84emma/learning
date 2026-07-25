@@ -3,5 +3,15 @@
     "*": true,
     "markdown": false,  // write things by hand
     "mdx": false
-  }
+  },
+  "[mdx]": {
+    // no autocomplete on prose words
+    "editor.wordBasedSuggestions": "off",
+    "editor.quickSuggestions": {
+      "other": false,
+      "comments": false,
+      "strings": false
+    },
+    "editor.suggestOnTriggerCharacters": false
+  },
 }
