@@ -4,8 +4,9 @@
 // with counter-reset on .prose defined in global.css.
 ---
 
-<span class="footnote">
-	<sup><button class="footnote-ref" type="button" aria-label="footnote"></button></sup>
+<span class="footnote"><sup
+		><button class="footnote-ref" type="button" aria-label="footnote"></button></sup
+	>
 	<span class="footnote-card" role="tooltip"><slot /></span>
 </span>
 
@@ -23,7 +24,8 @@
 		background: none;
 		border: none;
 		padding: 0;
-		margin: 0;
+		/* Half a word space — markup is whitespace-free so this is the whole gap */
+		margin: 0 0 0 0.125em;
 		font: inherit;
 		color: var(--accent);
 		cursor: help;
