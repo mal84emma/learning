@@ -16,7 +16,7 @@
 :root {
 	color-scheme: light dark;
 	--sidebar-width: 220px;
-	--prose-font-size: 1.25rem;
+	--prose-font-size: 1rem;
 	--accent: oklch(0.55 0.16 350);
 	--accent-alt: oklch(0.76 0.055 157); /* Cambridge Blue (#A3C1AD) */
 	--accent-alt-light: oklch(from var(--accent-alt) calc(l + 0.0) c h);
@@ -69,10 +69,10 @@
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
 }
-:root.font-xs { --prose-font-size: 0.8rem; }
-:root.font-sm { --prose-font-size: 1rem; }
+:root.font-md { --prose-font-size: 1.25rem; }
 :root.font-lg { --prose-font-size: 1.5rem; }
 :root.font-xl { --prose-font-size: 1.75rem; }
+:root.font-2xl { --prose-font-size: 2rem; }
 
 /* @font-face for Atkinson is injected by BaseHead.astro using import.meta.env.BASE_URL */
 html {
@@ -157,7 +157,47 @@ p {
 	margin-bottom: 1em;
 }
 .prose p {
+	margin-bottom: var(--para-gap, 0.75em);
+}
+/* Opt-in tight paragraph group — wrap blocks in <div class="tight"> in MDX.
+   Its own 2em bottom margin collapses with the last child's, so spacing
+   after the group stays normal. */
+.prose .tight {
+	--para-gap: 0.33em;
 	margin-bottom: 2em;
+}
+/* Tailwind Preflight strips list markers/indent — restore them for prose */
+.prose ul,
+.prose ol {
+	margin-bottom: 2em;
+	padding-left: 1.5em;
+	list-style: revert;
+}
+.prose li {
+	margin-bottom: 0.5em;
+}
+/* Numbers come from a counter + ::before rather than ::marker: engines disagree
+   on whether trailing whitespace in ::marker content takes width, and on where
+   the outside marker box sits (Chrome pushes the number left, Firefox doesn't).
+   Inside the li box, normal box-model rules apply — li padding-left is the one
+   knob for the number-to-text gap, and wrapped lines hang correctly. */
+.prose ol {
+	/* ch = width of "0", so this is literally a two-character indent */
+	padding-left: 2ch;
+	list-style: none;
+	counter-reset: prose-ol;
+}
+.prose ol > li {
+	position: relative;
+	/* Includes the number's own ~0.85em width, so the visible gap is the remainder */
+	padding-left: 1.5em;
+	counter-increment: prose-ol;
+}
+.prose ol > li::before {
+	content: counter(prose-ol) '.';
+	position: absolute;
+	left: 0;
+	color: var(--accent-alt);
 }
 /* Footnote counter — resets per post, increments on each .footnote span */
 .prose {

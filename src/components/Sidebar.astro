@@ -48,7 +48,9 @@ const allCards = posts
 				document.body.style.transition = '';
 			}));
 		}
-		const savedFontSize = localStorage.getItem('learning-font-size');
+		// First visit defaults to font-lg. Must be ?? not || — an explicit choice of
+		// the smallest rung is stored as '' and has to survive as no class.
+		const savedFontSize = localStorage.getItem('learning-font-size') ?? 'font-lg';
 		if (savedFontSize) document.documentElement.classList.add(savedFontSize);
 	</script>
 	<div class="nav-scrollbar" id="nav-scrollbar">

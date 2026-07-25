@@ -6,11 +6,11 @@
 	<div class="font-size-section">
 		<span class="font-size-label">Text size</span>
 		<div class="font-size-scale">
-			<button class="scale-btn" data-size="font-xs">A</button>
-			<button class="scale-btn" data-size="font-sm">A</button>
 			<button class="scale-btn" data-size="">A</button>
+			<button class="scale-btn" data-size="font-md">A</button>
 			<button class="scale-btn" data-size="font-lg">A</button>
 			<button class="scale-btn" data-size="font-xl">A</button>
+			<button class="scale-btn" data-size="font-2xl">A</button>
 		</div>
 		<div class="scale-track"></div>
 	</div>
@@ -29,7 +29,7 @@
 </dialog>
 
 <script>
-	const fontSizes = ['font-xs', 'font-sm', '', 'font-lg', 'font-xl'];
+	const fontSizes = ['', 'font-md', 'font-lg', 'font-xl', 'font-2xl'];
 
 	function getModal() {
 		return document.getElementById('shortcuts-modal') as HTMLDialogElement | null;

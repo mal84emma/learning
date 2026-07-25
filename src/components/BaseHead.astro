@@ -81,7 +81,7 @@ const { title, description, image = FallbackImage } = Astro.props;
 	document.addEventListener('astro:before-swap', (e) => {
 		window._navLock = true;
 
-		const size = localStorage.getItem('learning-font-size');
+		const size = localStorage.getItem('learning-font-size') ?? 'font-lg';
 		if (size) e.newDocument.documentElement.classList.add(size);
 
 		const sidebarSaved = localStorage.getItem('sidebar-collapsed');
