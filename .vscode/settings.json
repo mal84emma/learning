@@ -1,0 +1,7 @@
+{
+  "github.copilot.enable": {
+    "*": true,
+    "markdown": false,  // write things by hand
+    "mdx": false
+  }
+}
